@@ -24,11 +24,12 @@ def extract_user_listings(user, id_to_name):
     for listing in r.json()["data"]:
         if listing["type"] == "sell":
             user_listings[id_to_name[listing["itemId"]]] = {
-                "price": listing["platinum"],
-                "quantity": listing["quantity"],
-                "visible": listing["visible"],
-                "created": listing["createdAt"],
-                "updated": listing["updatedAt"],
+                "price": listing.get("platinum", 0),
+                "quantity": listing.get("quantity", 1),
+                "rank": listing.get("rank"),
+                "visible": listing.get("visible", False),
+                "created": listing.get("createdAt", ""),
+                "updated": listing.get("updatedAt", ""),
             }
 
     return user_listings
