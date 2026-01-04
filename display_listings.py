@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-
-# ================================================================================
-# =                                     CWFM                                     =
-# ================================================================================
-
-# Copies a users warframe.market listings to clipboard ready for in game pasting.
-
 import pyperclip
 import requests
 
