@@ -13,11 +13,14 @@ def format_listings(listings):
             "price": str(details["price"]),
             "rank": str(details["rank"]) if details["rank"] is not None else "N/A",
             "quantity": str(details["quantity"]),
+            "updated": str(details["updated"]),
+            "created": str(details["created"]),
         }
         data_rows.append(row)
 
     # Determine column widths
-    column_widths = {"item": 0, "price": 0, "rank": 0, "quantity": 0}
+    column_widths = {key: 0 for key in row}
+
     for row in data_rows:
         for key in row:
             column_widths[key] = max(column_widths[key], len(row[key]), len(key))
@@ -34,7 +37,9 @@ def format_listings(listings):
     print(f"+{'+'.join(separator_row)}+")
 
     for row in data_rows:
-        data_row = [row[key].ljust(column_widths[key]) for key in row]
+        data_row = [
+            (" " + value).ljust(column_widths[key]) for key, value in row.items()
+        ]
 
         print(f"|{'|'.join(data_row)}|")
 

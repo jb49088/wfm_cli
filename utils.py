@@ -25,8 +25,8 @@ def extract_user_listings(user, id_to_name):
         if listing["type"] == "sell":
             user_listings[id_to_name[listing["itemId"]]] = {
                 "price": listing.get("platinum", 0),
-                "quantity": listing.get("quantity", 1),
                 "rank": listing.get("rank"),
+                "quantity": listing.get("quantity", 1),
                 "visible": listing.get("visible", False),
                 "created": listing.get("createdAt", ""),
                 "updated": listing.get("updatedAt", ""),
