@@ -6,19 +6,19 @@ from utils import (
 
 
 def format_listings(listings):
-    rows = []
-    for name, details in listings.items():
+    data_rows = []
+    for item, details in listings.items():
         row = {
-            "name": name,
+            "item": item,
             "price": str(details["price"]),
-            "quantity": str(details["quantity"]),
             "rank": str(details["rank"]) if details["rank"] is not None else "N/A",
+            "quantity": str(details["quantity"]),
         }
-        rows.append(row)
+        data_rows.append(row)
 
     # Determine column widths
-    column_widths = {"name": 0, "price": 0, "quantity": 0, "rank": 0}
-    for row in rows:
+    column_widths = {"item": 0, "price": 0, "rank": 0, "quantity": 0}
+    for row in data_rows:
         for key in row:
             column_widths[key] = max(column_widths[key], len(row[key]), len(key))
 
@@ -26,13 +26,16 @@ def format_listings(listings):
     for key in column_widths:
         column_widths[key] += 2
 
-    print(
-        f"|{'Item'.center(column_widths['name'], ' ')}|{'Price'.center(column_widths['price'], ' ')}|{'Rank'.center(column_widths['rank'], ' ')}|"
-    )
+    header_row = [
+        key.title().center((value), " ") for key, value in column_widths.items()
+    ]
 
-    for row in rows:
-        message = f"|{row['name']}{' ' * (column_widths['name'] - len(row['name']))}|{row['price']}{' ' * (column_widths['price'] - len(row['price']))}|{row['rank']}{' ' * (column_widths['rank'] - len(row['rank']))}|{row['quantity']}{' ' * (column_widths['quantity'] - len(row['quantity']))}|"
-        print(message)
+    print(f"|{'|'.join(header_row)}|")
+
+    for row in data_rows:
+        data_row = [row[key].ljust(column_widths[key]) for key in row]
+
+        print(f"|{'|'.join(data_row)}|")
 
 
 def display_listings():
