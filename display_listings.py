@@ -6,43 +6,25 @@ from utils import (
 
 
 def format_listings(listings):
-    longest_name = 0
-    longest_price = 0
-    longest_quantity = 0
-    longest_rank = 0
+    rows = []
+    for name, details in listings.items():
+        row = {
+            "name": name,
+            "price": str(details["price"]),
+            "quantity": str(details["quantity"]),
+            "rank": str(details["rank"]) if details["rank"] is not None else "N/A",
+        }
+        rows.append(row)
 
-    for listing in listings:
-        price = str(listings[listing]["price"])
-        quantity = str(listings[listing]["quantity"])
+    max_widths = {"name": 0, "price": 0, "quantity": 0, "rank": 0}
+    for row in rows:
+        max_widths["name"] = max(max_widths["name"], len(row["name"]))
+        max_widths["price"] = max(max_widths["price"], len(row["price"]))
+        max_widths["rank"] = max(max_widths["rank"], len(row["rank"]))
+        max_widths["quantity"] = max(max_widths["quantity"], len(row["quantity"]))
 
-        if listings[listing]["rank"] is not None:
-            rank = str(listings[listing]["rank"])
-        else:
-            rank = "N/A"
-
-        if len(listing) > longest_name:
-            longest_name = len(listing)
-
-        if len(price) > longest_price:
-            longest_price = len(price)
-
-        if len(rank) > longest_rank:
-            longest_rank = len(rank)
-
-        if len(quantity) > longest_quantity:
-            longest_quantity = len(quantity)
-
-    for listing in sorted(listings):
-        price = str(listings[listing]["price"])
-        quantity = str(listings[listing]["quantity"])
-
-        if listings[listing]["rank"] is not None:
-            rank = str(listings[listing]["rank"])
-        else:
-            rank = "N/A"
-
-        message = f"| {listing}{' ' * (longest_name - len(listing))} | Price: {price}p{' ' * (longest_price - len(price))} | Rank: {rank}{' ' * (longest_rank - len(rank))} | Quantity: {quantity}{' ' * (longest_quantity - len(quantity))} |"
-
+    for row in rows:
+        message = f"| {row['name']}{' ' * (max_widths['name'] - len(row['name']))} | Price: {row['price']}p{' ' * (max_widths['price'] - len(row['price']))} | Rank: {row['rank']}{' ' * (max_widths['rank'] - len(row['rank']))} | Quantity: {row['quantity']}{' ' * (max_widths['quantity'] - len(row['quantity']))} |"
         print(message)
 
 
