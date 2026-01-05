@@ -16,15 +16,22 @@ def format_listings(listings):
         }
         rows.append(row)
 
-    max_widths = {"name": 0, "price": 0, "quantity": 0, "rank": 0}
+    # Determine column widths
+    column_widths = {"name": 0, "price": 0, "quantity": 0, "rank": 0}
     for row in rows:
-        max_widths["name"] = max(max_widths["name"], len(row["name"]))
-        max_widths["price"] = max(max_widths["price"], len(row["price"]))
-        max_widths["rank"] = max(max_widths["rank"], len(row["rank"]))
-        max_widths["quantity"] = max(max_widths["quantity"], len(row["quantity"]))
+        for key in row:
+            column_widths[key] = max(column_widths[key], len(row[key]), len(key))
+
+    # Account for spacing
+    for key in column_widths:
+        column_widths[key] += 2
+
+    print(
+        f"|{'Item'.center(column_widths['name'], ' ')}|{'Price'.center(column_widths['price'], ' ')}|{'Rank'.center(column_widths['rank'], ' ')}|"
+    )
 
     for row in rows:
-        message = f"| {row['name']}{' ' * (max_widths['name'] - len(row['name']))} | Price: {row['price']}p{' ' * (max_widths['price'] - len(row['price']))} | Rank: {row['rank']}{' ' * (max_widths['rank'] - len(row['rank']))} | Quantity: {row['quantity']}{' ' * (max_widths['quantity'] - len(row['quantity']))} |"
+        message = f"|{row['name']}{' ' * (column_widths['name'] - len(row['name']))}|{row['price']}{' ' * (column_widths['price'] - len(row['price']))}|{row['rank']}{' ' * (column_widths['rank'] - len(row['rank']))}|{row['quantity']}{' ' * (column_widths['quantity'] - len(row['quantity']))}|"
         print(message)
 
 
