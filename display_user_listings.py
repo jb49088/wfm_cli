@@ -11,10 +11,10 @@ def build_rows(listings):
     data_rows = []
     for i, listing in enumerate(listings, start=1):
         row = {
-            "id": str(i),
+            "#": str(i),
             "item": listing["item"],
             "price": str(listing["price"]),
-            "rank": str(listing["rank"]) if listing["rank"] is not None else "N/A",
+            "rank": str(listing["rank"]) if listing["rank"] is not None else "",
             "quantity": str(listing["quantity"]),
             "updated": str(listing["updated"]),
             "created": str(listing["created"]),
@@ -24,10 +24,10 @@ def build_rows(listings):
     return data_rows
 
 
-def determine_widths(data_rows):
+def determine_widths(data_rows, sort_by):
     """Determine maximum width for each colunm."""
     column_widths = {
-        "id": 0,
+        "#": 0,
         "item": 0,
         "price": 0,
         "rank": 0,
@@ -38,7 +38,11 @@ def determine_widths(data_rows):
 
     for row in data_rows:
         for key in row:
-            column_widths[key] = max(column_widths[key], len(row[key]), len(key))
+            column_widths[key] = max(
+                column_widths[key],
+                len(row[key]),
+                len(key) + 2 if key == sort_by else len(key),  # +2 for the arrow
+            )
 
     # Account for spacing
     column_widths = {key: width + 2 for key, width in column_widths.items()}
@@ -46,12 +50,16 @@ def determine_widths(data_rows):
     return column_widths
 
 
-def display_listings(data_rows, column_widths):
+def display_listings(data_rows, column_widths, sort_by, order):
     """Display listings in a sql-like table."""
     separator_row = ["-" * width for width in column_widths.values()]
 
+    arrows = {"desc": "↓", "asc": "↑"}
+
     header_row = [
-        key.title().center(width) if key != "id" else key.upper().center(width)
+        f"{key} {arrows[order]}".title().center(width)
+        if key == sort_by
+        else key.title().center(width)
         for key, width in column_widths.items()
     ]
 
@@ -71,13 +79,14 @@ def display_listings(data_rows, column_widths):
 
 def display_user_listings():
     """Main entry point."""
+    username = "bhwsg"
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
-    user_listings = extract_user_listings("bhwsg", id_to_name)
-    sorted_user_listings = sort_user_listings(user_listings)
+    user_listings = extract_user_listings(username, id_to_name)
+    sorted_user_listings, sort_by, order = sort_user_listings(user_listings)
     data_rows = build_rows(sorted_user_listings)
-    column_widths = determine_widths(data_rows)
-    display_listings(data_rows, column_widths)
+    column_widths = determine_widths(data_rows, sort_by)
+    display_listings(data_rows, column_widths, sort_by, order)
 
 
 if __name__ == "__main__":

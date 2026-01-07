@@ -63,4 +63,4 @@ def sort_user_listings(listings, sort_by="updated", order=None):
         )
     )
 
-    return sorted_listings
+    return (sorted_listings, sort_by, default_orders[sort_by] if not order else order)
