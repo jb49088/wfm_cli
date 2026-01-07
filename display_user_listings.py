@@ -40,8 +40,8 @@ def determine_widths(data_rows, sort_by):
         for key in row:
             column_widths[key] = max(
                 column_widths[key],
-                len(row[key]),
-                len(key) + 2 if key == sort_by else len(key),  # +2 for the arrow
+                len(row[key]) + 1 if key == "price" else len(row[key]),  # +1 for p
+                len(key) + 2 if key == sort_by else len(key),  # +2 for arrow
             )
 
     # Account for spacing
@@ -69,7 +69,10 @@ def display_listings(data_rows, column_widths, sort_by, order):
 
     for row in data_rows:
         data_row = [
-            (" " + value).ljust(column_widths[key]) for key, value in row.items()
+            f" {value}p".ljust(column_widths[key])
+            if key == "price"
+            else f" {value}".ljust(column_widths[key])
+            for key, value in row.items()
         ]
 
         print(f"|{'|'.join(data_row)}|")
