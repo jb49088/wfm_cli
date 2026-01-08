@@ -10,8 +10,13 @@ def get_all_items():
 
 
 def build_id_to_name_mapping(all_items):
-    """Build id to name mapping dictionary."""
+    """Build a mapping from item ID to in game name."""
     return {item["id"]: item["i18n"]["en"]["name"] for item in all_items}
+
+
+def build_name_to_max_rank_mapping(all_items, id_to_name):
+    """Build a mapping from item name to max rank."""
+    return {id_to_name[item["id"]]: item.get("maxRank") for item in all_items}
 
 
 def extract_user_listings(user, id_to_name):

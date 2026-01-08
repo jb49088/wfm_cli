@@ -2,13 +2,14 @@ import pyperclip
 
 from utils import (
     build_id_to_name_mapping,
+    build_name_to_max_rank_mapping,
     extract_user_listings,
     get_all_items,
     sort_user_listings,
 )
 
 
-def build_rows(listings, copy=True):
+def build_rows(listings, max_ranks, copy=True):
     """Build rows for table rendering."""
     data_rows = []
     for i, listing in enumerate(listings, start=1):
@@ -16,7 +17,9 @@ def build_rows(listings, copy=True):
             "#": str(i),
             "item": listing["item"],
             "price": str(listing["price"]),
-            "rank": str(listing["rank"]) if listing["rank"] is not None else "",
+            "rank": f"{listing['rank']}/{max_ranks[listing['item']]}"
+            if listing["rank"] is not None
+            else "",
             "quantity": str(listing["quantity"]),
             "updated": str(listing["updated"]),
             "created": str(listing["created"]),
@@ -81,7 +84,7 @@ def copy_listing(user, data_rows):
 
     for row in data_rows:
         if row["#"] == listing:
-            rank_segment = f" (rank {row['rank']})" if row["rank"] else ""
+            rank_segment = f" (rank {row['rank']})" if row.get("rank") else ""
             message = f'/w {user} Hi! I want to buy: "{row["item"]}{rank_segment}" for {row["price"]} platinum. (wfm_cli)'
             pyperclip.copy(message)
             print(f"Copied to clipboard: {message}")
@@ -98,9 +101,10 @@ def display_user_listings():
     }
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
+    max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
     user_listings = extract_user_listings(args["user"], id_to_name)
     sorted_user_listings, sort_by, order = sort_user_listings(user_listings)
-    data_rows = build_rows(sorted_user_listings, args["copy"])
+    data_rows = build_rows(sorted_user_listings, max_ranks, args["copy"])
     column_widths = determine_widths(data_rows, sort_by)
     display_listings(data_rows, column_widths, sort_by, order)
     if args["copy"]:
