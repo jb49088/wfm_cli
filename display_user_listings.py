@@ -1,3 +1,5 @@
+import pyperclip
+
 from utils import (
     build_id_to_name_mapping,
     extract_user_listings,
@@ -6,7 +8,7 @@ from utils import (
 )
 
 
-def build_rows(listings, no_copy=False):
+def build_rows(listings, copy=True):
     """Build rows for table rendering."""
     data_rows = []
     for i, listing in enumerate(listings, start=1):
@@ -19,7 +21,7 @@ def build_rows(listings, no_copy=False):
             "updated": str(listing["updated"]),
             "created": str(listing["created"]),
         }
-        if no_copy:
+        if not copy:
             del row["#"]
         data_rows.append(row)
 
@@ -74,15 +76,35 @@ def display_listings(data_rows, column_widths, sort_by, order):
     print(f"+{'+'.join(separator_row)}+")
 
 
+def copy_listing(user, data_rows):
+    listing = input("Listing to copy: ").strip()
+
+    for row in data_rows:
+        if row["#"] == listing:
+            rank_segment = f" (rank {row['rank']})" if row["rank"] else ""
+            message = f'/w {user} Hi! I want to buy: "{row["item"]}{rank_segment}" for {row["price"]} platinum. (wfm_cli)'
+            pyperclip.copy(message)
+            print(f"Copied to clipboard: {message}")
+            return
+
+    print(f"Listing {listing} not found")
+
+
 def display_user_listings():
     """Main entry point."""
+    args = {
+        "user": "bhwsg",
+        "copy": True,
+    }
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
-    user_listings = extract_user_listings("bhwsg", id_to_name)
+    user_listings = extract_user_listings(args["user"], id_to_name)
     sorted_user_listings, sort_by, order = sort_user_listings(user_listings)
-    data_rows = build_rows(sorted_user_listings)
+    data_rows = build_rows(sorted_user_listings, args["copy"])
     column_widths = determine_widths(data_rows, sort_by)
     display_listings(data_rows, column_widths, sort_by, order)
+    if args["copy"]:
+        copy_listing(args["user"], data_rows)
 
 
 if __name__ == "__main__":

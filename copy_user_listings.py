@@ -100,10 +100,12 @@ def copy_to_clipboard(chunks):
 
 def copy_listings():
     """Main entry point."""
-    username = "bhwsg"
+    args = {
+        "user": "bhwsg",
+    }
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
-    user_listings = extract_user_listings(username, id_to_name)
+    user_listings = extract_user_listings(args["user"], id_to_name)
     sorted_user_listings, _, _ = sort_user_listings(user_listings)
     expanded_listings = expand_item_sets(sorted_user_listings, all_items)
     links = convert_listings_to_links(expanded_listings)
