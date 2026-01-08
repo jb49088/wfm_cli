@@ -3,6 +3,8 @@ import pyperclip
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
+    determine_widths,
+    display_listings,
     extract_user_listings,
     get_all_items,
     sort_user_listings,
@@ -28,57 +30,6 @@ def build_rows(listings, max_ranks, copy=True):
         data_rows.append(row)
 
     return data_rows
-
-
-def determine_widths(data_rows, sort_by):
-    """Determine maximum width for each colunm."""
-    column_widths = {key: 0 for key in data_rows[0]}
-
-    for row in data_rows:
-        for key in row:
-            column_widths[key] = max(
-                column_widths[key],
-                len(row[key]) + 1 if key == "price" else len(row[key]),  # +1 for p
-                len(key) + 2 if key == sort_by else len(key),  # +2 for arrow
-            )
-
-    # Account for spacing
-    column_widths = {key: width + 2 for key, width in column_widths.items()}
-
-    return column_widths
-
-
-def display_listings(data_rows, column_widths, sort_by, order):
-    """Display listings in a sql-like table."""
-    separator_row = ["-" * width for width in column_widths.values()]
-
-    arrows = {"desc": "↓", "asc": "↑"}
-
-    header_row = [
-        f"{key} {arrows[order]}".title().center(width)
-        if key == sort_by
-        else key.title().center(width)
-        for key, width in column_widths.items()
-    ]
-
-    print(f"+{'+'.join(separator_row)}+")
-    print(f"|{'|'.join(header_row)}|")
-    print(f"+{'+'.join(separator_row)}+")
-
-    for row in data_rows:
-        data_row = []
-        for key, value in row.items():
-            if key == "price":
-                value = f"{value}p"
-            if key in ("price", "rank", "quantity"):
-                formatted = f"{value} ".rjust(column_widths[key])
-            else:
-                formatted = f" {value}".ljust(column_widths[key])
-            data_row.append(formatted)
-
-        print(f"|{'|'.join(data_row)}|")
-
-    print(f"+{'+'.join(separator_row)}+")
 
 
 def copy_listing(user, data_rows):

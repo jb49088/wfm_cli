@@ -3,6 +3,8 @@ import requests
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
+    determine_widths,
+    display_listings,
     get_all_items,
 )
 
@@ -63,6 +65,8 @@ def display_item_listings():
     max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
     item_listings = extract_item_listings(id_to_name)
     data_rows = build_rows(item_listings, max_ranks)
+    column_widths = determine_widths(data_rows, "item")
+    display_listings(data_rows, column_widths, "item", "asc")
 
 
 if __name__ == "__main__":
