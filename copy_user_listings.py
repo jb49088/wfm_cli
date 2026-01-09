@@ -98,7 +98,7 @@ def copy_to_clipboard(chunks):
             print(f"Chunk {i}/{len(chunks)} copied ({len(chunk)} chars).")
 
 
-def copy_listings():
+def copy_user_listings():
     """Main entry point."""
     args = {
         "user": "bhwsg",
@@ -114,4 +114,4 @@ def copy_listings():
 
 
 if __name__ == "__main__":
-    copy_listings()
+    copy_user_listings()
