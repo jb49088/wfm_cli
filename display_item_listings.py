@@ -62,7 +62,11 @@ def sort_item_listings(listings, sort_by, order):
         "updated": "desc",
     }
 
-    is_desc = (default_orders[sort_by] == "desc") if not order else (order == "desc")
+    # Use default order if none provided
+    if order is None:
+        order = default_orders[sort_by]
+
+    is_desc = order == "desc"
 
     sorted_listings = list(
         sorted(
@@ -76,7 +80,7 @@ def sort_item_listings(listings, sort_by, order):
         )
     )
 
-    return (sorted_listings, sort_by, default_orders[sort_by] if not order else order)
+    return (sorted_listings, sort_by, order)
 
 
 def build_rows(listings, max_ranks, copy):
