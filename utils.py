@@ -44,7 +44,7 @@ def extract_user_listings(user, id_to_name):
     return user_listings
 
 
-def sort_user_listings(listings, sort_by="updated", order=None):
+def sort_user_listings(listings, sort_by, order):
     """Sort listings with sane defaults."""
     default_orders = {
         "item": "asc",
