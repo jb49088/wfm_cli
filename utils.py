@@ -21,6 +21,9 @@ def build_name_to_max_rank_mapping(all_items, id_to_name):
     return {id_to_name[item["id"]]: item.get("maxRank") for item in all_items}
 
 
+# TODO: reverse engineer username normalization for api url
+
+
 def extract_user_listings(user, id_to_name):
     """Extract and process listings for a specific user."""
     r = requests.get(f"https://api.warframe.market/v2/orders/user/{user.lower()}")
