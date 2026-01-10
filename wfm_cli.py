@@ -3,6 +3,7 @@
 # ================================================================================
 
 # TODO: Reverse engineer username normalization for api url
+# TODO: Reverse engineer item names normalization for api url
 # TODO: Add secondary sort by updated to break price ties
 # TODO: Add error handling when a user has 0 listings
 
