@@ -2,7 +2,6 @@
 # =                                   WFM_CLI                                    =
 # ================================================================================
 
-# TODO: Reverse engineer item names normalization for api url
 # TODO: Deal with ayatan sculpture ranking
 
 import argparse

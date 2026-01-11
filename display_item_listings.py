@@ -26,6 +26,11 @@ STATUS_MAPPING = {"offline": "Offline", "online": "Online", "ingame": "In Game"}
 RIGHT_ALLIGNED_COLUMNS = ("price", "rank", "quantity", "reputation")
 
 
+def slugify_item_name(item):
+    """Convert item name to URL-safe slug."""
+    return item.lower().replace(" ", "_")
+
+
 def extract_item_listings(item, id_to_name):
     """Extract and process listings for a specific item."""
     r = requests.get(f"https://api.warframe.market/v2/orders/item/{item.lower()}")
@@ -102,7 +107,8 @@ def display_item_listings(args):
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
     max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
-    item_listings = extract_item_listings(args.item, id_to_name)
+    item_slug = slugify_item_name(args.item)
+    item_listings = extract_item_listings(item_slug, id_to_name)
     filtered_item_listings = filter_listings(item_listings, args.rank, args.in_game)
     sorted_item_listings, sort, order = sort_listings(
         filtered_item_listings, args.sort, args.order, DEFAULT_ORDERS
