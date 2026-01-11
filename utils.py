@@ -117,11 +117,14 @@ def display_listings(data_rows, column_widths, right_alligned_columns, sort_by, 
 
     for row in data_rows:
         data_row = []
-        for key, value in row.items():
+        for key in column_widths:
+            value = row.get(key, "")
+
             if key in right_alligned_columns:
                 formatted = f"{value} ".rjust(column_widths[key])
             else:
                 formatted = f" {value}".ljust(column_widths[key])
+
             data_row.append(formatted)
 
         print(f"|{'|'.join(data_row)}|")

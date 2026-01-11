@@ -24,20 +24,23 @@ RIGHT_ALLIGNED_COLUMNS = ("price", "rank", "quantity")
 
 def build_rows(listings, max_ranks, copy):
     """Build rows for table rendering."""
+    show_rank = any(listing.get("rank") is not None for listing in listings)
     data_rows = []
     for i, listing in enumerate(listings, start=1):
-        row = {
-            "#": str(i),
-            "item": listing["item"],
-            "price": f"{listing['price']}p",
-            "rank": f"{listing['rank']}/{max_ranks[listing['item']]}"
-            if listing["rank"] is not None
-            else "",
-            "quantity": str(listing["quantity"]),
-            "updated": str(listing["updated"]),
-        }
-        if not copy:
-            del row["#"]
+        row = {}
+
+        if copy:
+            row["#"] = str(i)
+
+        row["item"] = listing["item"]
+        row["price"] = f"{listing['price']}p"
+
+        if show_rank and listing.get("rank") is not None:
+            row["rank"] = f"{listing['rank']}/{max_ranks[listing['item']]}"
+
+        row["quantity"] = str(listing["quantity"])
+        row["updated"] = str(listing["updated"])
+
         data_rows.append(row)
 
     return data_rows

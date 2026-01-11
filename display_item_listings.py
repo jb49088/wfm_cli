@@ -40,19 +40,19 @@ def extract_item_listings(item, id_to_name):
 
     for listing in r.json()["data"]:
         if listing["type"] == "sell":
-            item_listings.append(
-                {
-                    "seller": listing.get("user", {}).get("ingameName", "Unknown"),
-                    "reputation": listing.get("user", {}).get("reputation", 0),
-                    "status": listing.get("user", {}).get("status", "offline"),
-                    "item": id_to_name[listing.get("itemId", "")],
-                    "itemId": listing.get("itemId", ""),
-                    "price": listing.get("platinum", 0),
-                    "rank": listing.get("rank"),
-                    "quantity": listing.get("quantity", 1),
-                    "updated": listing.get("updatedAt", ""),
-                }
-            )
+            listing_dict = {
+                "seller": listing.get("user", {}).get("ingameName", "Unknown"),
+                "reputation": listing.get("user", {}).get("reputation", 0),
+                "status": listing.get("user", {}).get("status", "offline"),
+                "item": id_to_name[listing.get("itemId", "")],
+                "itemId": listing.get("itemId", ""),
+                "rank": listing.get("rank"),
+                "price": listing.get("platinum", 0),
+                "quantity": listing.get("quantity", 1),
+                "updated": listing.get("updatedAt", ""),
+            }
+
+            item_listings.append(listing_dict)
 
     return item_listings
 
@@ -61,21 +61,23 @@ def build_rows(listings, max_ranks, copy):
     """Build rows for table rendering."""
     data_rows = []
     for i, listing in enumerate(listings, start=1):
-        row = {
-            "#": str(i),
-            "seller": listing["seller"],
-            "reputation": str(listing["reputation"]),
-            "status": STATUS_MAPPING[listing["status"]],
-            "item": listing["item"],
-            "price": f"{listing['price']}p",
-            "rank": f"{listing['rank']}/{max_ranks[listing['item']]}"
-            if listing["rank"] is not None
-            else "",
-            "quantity": str(listing["quantity"]),
-            "updated": str(listing["updated"]),
-        }
-        if not copy:
-            del row["#"]
+        row = {}
+
+        if copy:
+            row["#"] = str(i)
+
+        row["seller"] = listing["seller"]
+        row["reputation"] = str(listing["reputation"])
+        row["status"] = STATUS_MAPPING[listing["status"]]
+        row["item"] = listing["item"]
+
+        if listing.get("rank") is not None:
+            row["rank"] = f"{listing['rank']}/{max_ranks[listing['item']]}"
+
+        row["price"] = f"{listing['price']}p"
+        row["quantity"] = str(listing["quantity"])
+        row["updated"] = str(listing["updated"])
+
         data_rows.append(row)
 
     return data_rows
