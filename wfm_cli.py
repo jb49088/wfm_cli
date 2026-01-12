@@ -2,15 +2,26 @@
 # =                                   WFM_CLI                                    =
 # ================================================================================
 
-# TODO: Deal with ayatan sculpture ranking
-
 import argparse
+import os
 
 from copy_user_listings import copy_user_listings
 from display_item_listings import display_item_listings
 from display_user_listings import display_user_listings
+from menu import menu
+
+
+def wfm_cli():
+    menu()
+    option = input("Option > ")
+    if option == "1":
+        # os.system("cls" if os.name == "nt" else "clear")
+        # menu()
+        item = input("Item > ")
+
 
 if __name__ == "__main__":
+    wfm_cli()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
 
