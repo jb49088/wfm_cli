@@ -61,22 +61,21 @@ def build_rows(listings, max_ranks, copy):
     """Build rows for table rendering."""
     data_rows = []
     for i, listing in enumerate(listings, start=1):
-        row = {}
+        row = {
+            "seller": listing["seller"],
+            "reputation": str(listing["reputation"]),
+            "status": STATUS_MAPPING[listing["status"]],
+            "item": listing["item"],
+            "price": f"{listing['price']}p",
+            "quantity": str(listing["quantity"]),
+            "updated": str(listing["updated"]),
+        }
 
         if copy:
             row["#"] = str(i)
 
-        row["seller"] = listing["seller"]
-        row["reputation"] = str(listing["reputation"])
-        row["status"] = STATUS_MAPPING[listing["status"]]
-        row["item"] = listing["item"]
-
         if listing.get("rank") is not None:
             row["rank"] = f"{listing['rank']}/{max_ranks[listing['item']]}"
-
-        row["price"] = f"{listing['price']}p"
-        row["quantity"] = str(listing["quantity"])
-        row["updated"] = str(listing["updated"])
 
         data_rows.append(row)
 

@@ -1,5 +1,17 @@
 import requests
 
+COLUMNS = [
+    "#",
+    "seller",
+    "reputation",
+    "status",
+    "item",
+    "price",
+    "rank",
+    "quantity",
+    "updated",
+]
+
 ARROW_MAPPING = {"desc": "↓", "asc": "↑"}
 
 
@@ -84,14 +96,16 @@ def sort_listings(listings, sort_by, order, default_orders):
 
 def determine_widths(data_rows, sort_by):
     """Determine maximum width for each colunm."""
-    column_widths = {key: 0 for key in data_rows[0]}
+    active_columns = [col for col in COLUMNS if any(col in row for row in data_rows)]
+
+    column_widths = {col: 0 for col in active_columns}
 
     for row in data_rows:
-        for key in row:
-            column_widths[key] = max(
-                column_widths[key],
-                len(row[key]),
-                len(key) + 2 if key == sort_by else len(key),  # +2 for arrow
+        for col in active_columns:
+            column_widths[col] = max(
+                column_widths[col],
+                len(str(row.get(col, ""))),
+                len(col) + 2 if col == sort_by else len(col),  # +2 for arrow
             )
 
     # Account for spacing
