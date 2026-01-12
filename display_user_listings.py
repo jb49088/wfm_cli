@@ -3,6 +3,7 @@ import pyperclip
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
+    clear_screen,
     determine_widths,
     display_listings,
     extract_user_listings,
@@ -67,18 +68,18 @@ def copy_listing(user, data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_user_listings(args):
+def display_user_listings(user, rank=None, sort="updated", order=None, copy=False):
     """Main entry point."""
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
     max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
-    user_listings = extract_user_listings(args.user, id_to_name)
-    filtered_item_listings = filter_listings(user_listings, args.rank, in_game=False)
+    user_listings = extract_user_listings(user, id_to_name)
+    filtered_item_listings = filter_listings(user_listings, rank, in_game=False)
     sorted_user_listings, sort, order = sort_listings(
-        filtered_item_listings, args.sort, args.order, DEFAULT_ORDERS
+        filtered_item_listings, sort, order, DEFAULT_ORDERS
     )
-    data_rows = build_rows(sorted_user_listings, max_ranks, args.copy)
+    data_rows = build_rows(sorted_user_listings, max_ranks, copy)
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, order)
-    if args.copy:
-        copy_listing(args.user, data_rows)
+    if copy:
+        copy_listing(user, data_rows)

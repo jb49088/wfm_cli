@@ -4,6 +4,7 @@ import requests
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
+    clear_screen,
     determine_widths,
     display_listings,
     filter_listings,
@@ -103,19 +104,22 @@ def copy_listing(data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_item_listings(args):
+def display_item_listings(
+    item, sort="price", order=None, rank=None, in_game=True, copy=True
+):
     """Main entry point."""
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
     max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
-    item_slug = slugify_item_name(args.item)
+    item_slug = slugify_item_name(item)
     item_listings = extract_item_listings(item_slug, id_to_name)
-    filtered_item_listings = filter_listings(item_listings, args.rank, args.in_game)
+    filtered_item_listings = filter_listings(item_listings, rank, in_game)
     sorted_item_listings, sort, order = sort_listings(
-        filtered_item_listings, args.sort, args.order, DEFAULT_ORDERS
+        filtered_item_listings, sort, order, DEFAULT_ORDERS
     )
-    data_rows = build_rows(sorted_item_listings, max_ranks, args.copy)
+    data_rows = build_rows(sorted_item_listings, max_ranks, copy)
     column_widths = determine_widths(data_rows, sort)
+    clear_screen()
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, order)
-    if args.copy:
+    if copy:
         copy_listing(data_rows)

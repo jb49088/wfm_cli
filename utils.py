@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 COLUMNS = [
@@ -13,6 +15,10 @@ COLUMNS = [
 ]
 
 ARROW_MAPPING = {"desc": "↓", "asc": "↑"}
+
+
+def clear_screen():
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def get_all_items():
