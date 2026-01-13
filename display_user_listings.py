@@ -3,7 +3,6 @@ import pyperclip
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
-    clear_screen,
     determine_widths,
     display_listings,
     extract_user_listings,

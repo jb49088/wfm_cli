@@ -1,5 +1,4 @@
 import os
-import sys
 
 import requests
 
@@ -18,22 +17,8 @@ COLUMNS = [
 ARROW_MAPPING = {"desc": "↓", "asc": "↑"}
 
 
-def enter_alt_screen():
-    sys.stdout.write("\033[?1049h")
-    sys.stdout.flush()
-
-
-def exit_alt_screen():
-    sys.stdout.write("\033[?1049l")
-    sys.stdout.flush()
-
-
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
-
-
-def display_navbar(breadcrumbs):
-    print(" > ".join(breadcrumbs), "\n")
 
 
 def get_all_items():

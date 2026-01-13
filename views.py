@@ -1,4 +1,4 @@
-from utils import clear_screen, display_navbar
+from utils import clear_screen
 
 MENU_OPTIONS = [
     "Search for item",
@@ -14,12 +14,8 @@ MENU_OPTIONS = [
 
 def menu():
     clear_screen()
-    display_navbar(["wfm_cli"])
+    print("wfm_cli")
+    print()
     for i, option in enumerate(MENU_OPTIONS, 1):
         print(f"{i}. {option}")
     print()
-
-
-def item_search():
-    clear_screen()
-    display_navbar(["wfm_cli", "Search for item"])

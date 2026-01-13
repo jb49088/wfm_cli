@@ -34,7 +34,7 @@ def slugify_item_name(item):
 
 def extract_item_listings(item, id_to_name):
     """Extract and process listings for a specific item."""
-    r = requests.get(f"https://api.warframe.market/v2/orders/item/{item.lower()}")
+    r = requests.get(f"https://api.warframe.market/v2/orders/item/{item}")
     r.raise_for_status()
 
     item_listings = []
@@ -84,8 +84,8 @@ def build_rows(listings, max_ranks, copy):
 
 
 def copy_listing(data_rows):
-    """Prompt for and copy a listing."""
-    listing = input("Listing to copy: ").strip()
+    """Copy a listing for in-game whispering."""
+    listing = input("> ")
 
     for row in data_rows:
         if row["#"] == listing:
