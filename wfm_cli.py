@@ -7,7 +7,7 @@ import sys
 from copy_user_listings import copy_user_listings
 from display_item_listings import display_item_listings
 from display_user_listings import display_user_listings
-from views import menu
+from views import menu, profile
 
 
 def enter_alt_screen():
@@ -22,12 +22,13 @@ def exit_alt_screen():
 
 def wfm_cli():
     menu()
-    option = input("Option> ")
+    option = input("> ")
     if option == "1":
-        item = input("Item> ")
+        item = input("Search> ")
         display_item_listings(item)
-    elif option == "2":
-        pass
+    elif option == "5":
+        profile()
+        item = input("> ")
     elif option == "7":
         exit_alt_screen()
 

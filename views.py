@@ -1,10 +1,10 @@
 from utils import clear_screen
 
 MENU_OPTIONS = [
-    "Search for item",
-    "Show my listings",
-    "Sync my listings",
-    "Change my status",
+    "Search",
+    "Listings",
+    "Sync listings",
+    "Change status",
     "Profile",
     "Quit",
 ]
@@ -27,4 +27,15 @@ def menu():
     # Menu options
     for i, option in enumerate(MENU_OPTIONS, 1):
         print(f"{i}. {option}")
+    print()
+
+
+def profile():
+    clear_screen()
+    print("Profile")
+    print()
+    print("Name: Username123")
+    print("Reputation: 1337")
+    print("Platform: PC")
+    print("Crossplay: On")
     print()
