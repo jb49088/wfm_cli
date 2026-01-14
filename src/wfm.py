@@ -8,6 +8,7 @@
 # TODO: finish basic argument parsing functionality
 
 import shlex
+from pathlib import Path
 
 from prompt_toolkit import ANSI, PromptSession
 from prompt_toolkit.history import FileHistory
@@ -16,6 +17,14 @@ from copy_user_listings import copy_user_listings
 from display_item_listings import display_item_listings
 from display_user_listings import display_user_listings
 from utils import clear_screen
+
+APP_DIR = Path.home() / ".wfm"
+CONFIG_FILE = APP_DIR / "config.json"
+HISTORY_FILE = APP_DIR / "history"
+
+
+def ensure_app_dir():
+    APP_DIR.mkdir(exist_ok=True)
 
 
 def handle_search(args):
@@ -43,7 +52,8 @@ def handle_search(args):
 
 def wfm():
     """Main entry point for wfm."""
-    session = PromptSession(history=FileHistory("data/history"))
+    ensure_app_dir()
+    session = PromptSession(history=FileHistory(HISTORY_FILE))
     status = "\033[32mIn Game\033[0m"
     while True:
         try:
