@@ -18,7 +18,31 @@ from display_user_listings import display_user_listings
 from utils import clear_screen
 
 
+def handle_search(args):
+    """Parse and display an items listings."""
+    item = args[0]
+
+    kwargs = {
+        "sort": "price",
+        "order": None,
+        "rank": None,
+        "status": "ingame",
+    }
+
+    rest = args[1:]
+    pairs = zip(rest[::2], rest[1::2])
+
+    for key, value in pairs:
+        kwargs[key] = value
+
+    if kwargs["rank"]:
+        kwargs["rank"] = int(kwargs["rank"])
+
+    display_item_listings(item=item, **kwargs)
+
+
 def wfm_cli():
+    """Main entry point for wfm_cli."""
     session = PromptSession(history=FileHistory("data/history"))
     status = "\033[32mIn Game\033[0m"
     while True:
@@ -32,25 +56,7 @@ def wfm_cli():
         args = parts[1:]
 
         if action == "search":
-            item = args[0]
-
-            kwargs = {
-                "sort": "price",
-                "order": None,
-                "rank": None,
-                "status": "ingame",
-            }
-
-            rest = args[1:]
-            pairs = zip(rest[::2], rest[1::2])
-
-            for key, value in pairs:
-                kwargs[key] = value
-
-            if kwargs["rank"]:
-                kwargs["rank"] = int(kwargs["rank"])
-
-            display_item_listings(item=item, **kwargs)
+            handle_search(args)
 
         elif action == "clear":
             clear_screen()
