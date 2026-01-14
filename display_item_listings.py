@@ -5,7 +5,6 @@ from config import PUBLIC_HEADERS
 from utils import (
     build_id_to_name_mapping,
     build_name_to_max_rank_mapping,
-    clear_screen,
     determine_widths,
     display_listings,
     filter_listings,
@@ -122,7 +121,6 @@ def display_item_listings(
     )
     data_rows = build_rows(sorted_item_listings, max_ranks, copy)
     column_widths = determine_widths(data_rows, sort)
-    clear_screen()
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, order)
     if copy:
         copy_listing(data_rows)
