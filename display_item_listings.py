@@ -60,11 +60,12 @@ def extract_item_listings(item, id_to_name):
     return item_listings
 
 
-def build_rows(listings, max_ranks, copy):
+def build_rows(listings, max_ranks):
     """Build rows for table rendering."""
     data_rows = []
     for i, listing in enumerate(listings, start=1):
         row = {
+            "#": str(i),
             "seller": listing["seller"],
             "reputation": str(listing["reputation"]),
             "status": STATUS_MAPPING[listing["status"]],
@@ -73,9 +74,6 @@ def build_rows(listings, max_ranks, copy):
             "quantity": str(listing["quantity"]),
             "updated": str(listing["updated"]),
         }
-
-        if copy:
-            row["#"] = str(i)
 
         if listing.get("rank") is not None:
             row["rank"] = f"{listing['rank']}/{max_ranks[listing['item']]}"
@@ -106,9 +104,7 @@ def copy_listing(data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_item_listings(
-    item, sort="price", order=None, rank=None, in_game=True, copy=True
-):
+def display_item_listings(item, sort="price", order=None, rank=None, in_game=True):
     """Main entry point."""
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
@@ -119,8 +115,6 @@ def display_item_listings(
     sorted_item_listings, sort, order = sort_listings(
         filtered_item_listings, sort, order, DEFAULT_ORDERS
     )
-    data_rows = build_rows(sorted_item_listings, max_ranks, copy)
+    data_rows = build_rows(sorted_item_listings, max_ranks)
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, order)
-    if copy:
-        copy_listing(data_rows)

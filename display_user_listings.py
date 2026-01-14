@@ -23,20 +23,18 @@ DEFAULT_ORDERS = {
 RIGHT_ALLIGNED_COLUMNS = ("price", "rank", "quantity")
 
 
-def build_rows(listings, max_ranks, copy):
+def build_rows(listings, max_ranks):
     """Build rows for table rendering."""
     show_rank = any(listing.get("rank") is not None for listing in listings)
     data_rows = []
     for i, listing in enumerate(listings, start=1):
         row = {
+            "#": str(i),
             "item": listing["item"],
             "price": f"{listing['price']}p",
             "quantity": str(listing["quantity"]),
             "updated": str(listing["updated"]),
         }
-
-        if copy:
-            row["#"] = str(i)
 
         if show_rank and listing.get("rank") is not None:
             row["rank"] = f"{listing['rank']}/{max_ranks[listing['item']]}"
@@ -67,7 +65,7 @@ def copy_listing(user, data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_user_listings(user, rank=None, sort="updated", order=None, copy=False):
+def display_user_listings(user, rank=None, sort="updated", order=None):
     """Main entry point."""
     all_items = get_all_items()
     id_to_name = build_id_to_name_mapping(all_items)
@@ -77,8 +75,6 @@ def display_user_listings(user, rank=None, sort="updated", order=None, copy=Fals
     sorted_user_listings, sort, order = sort_listings(
         filtered_item_listings, sort, order, DEFAULT_ORDERS
     )
-    data_rows = build_rows(sorted_user_listings, max_ranks, copy)
+    data_rows = build_rows(sorted_user_listings, max_ranks)
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, order)
-    if copy:
-        copy_listing(user, data_rows)
