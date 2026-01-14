@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from config import PUBLIC_HEADERS
+
 COLUMNS = [
     "#",
     "seller",
@@ -23,7 +25,7 @@ def clear_screen():
 
 def get_all_items():
     """Extract all raw item data."""
-    r = requests.get("https://api.warframe.market/v2/items")
+    r = requests.get(url="https://api.warframe.market/v2/items", headers=PUBLIC_HEADERS)
     r.raise_for_status()
 
     return r.json()["data"]
@@ -41,7 +43,10 @@ def build_name_to_max_rank_mapping(all_items, id_to_name):
 
 def extract_user_listings(user, id_to_name):
     """Extract and process listings for a specific user."""
-    r = requests.get(f"https://api.warframe.market/v2/orders/user/{user.lower()}")
+    r = requests.get(
+        url=f"https://api.warframe.market/v2/orders/user/{user.lower()}",
+        headers=PUBLIC_HEADERS,
+    )
     r.raise_for_status()
 
     user_listings = []

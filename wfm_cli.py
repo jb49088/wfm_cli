@@ -40,4 +40,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     # finally:
-    #     exit_alt_screen()
+    # exit_alt_screen()
