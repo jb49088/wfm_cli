@@ -11,6 +11,7 @@ import json
 import shlex
 from pathlib import Path
 
+import requests
 from prompt_toolkit import ANSI, PromptSession
 from prompt_toolkit.history import FileHistory
 
@@ -70,6 +71,22 @@ def build_authenticated_headers(cookies):
     return headers
 
 
+def get_user_info(headers):
+    """Get the authenticated users profile info."""
+    r = requests.get(url="https://api.warframe.market/v2/me", headers=headers)
+    r.raise_for_status()
+
+    data = r.json()["data"]
+
+    return {
+        "ingameName": data.get("ingameName", "Unknown"),
+        "slug": data["slug"],
+        "reputation": data.get("reputation", 0),
+        "platform": data["platform"],
+        "crossplay": data.get("crossplay", False),
+    }
+
+
 def handle_search(args):
     """Parse and display an items listings."""
     item = args[0]
@@ -104,6 +121,8 @@ def wfm():
     cookies = load_cookies()
 
     authenticated_headers = build_authenticated_headers(cookies)
+
+    user_info = get_user_info(authenticated_headers)
 
     session = PromptSession(history=FileHistory(HISTORY_FILE))
 
