@@ -149,10 +149,10 @@ def display_profile(user_info):
         "mobile": "Mobile",
     }
     print()
-    print(f"Username: {user_info['ingameName']}")
+    print(f"Username:   {user_info['ingameName']}")
     print(f"Reputation: {user_info['reputation']}")
-    print(f"Platform: {platform_mapping[user_info['platform']]}")
-    print(f"Crossplay: {'Enabled' if user_info['crossplay'] else 'Disabled'}")
+    print(f"Platform:   {platform_mapping[user_info['platform']]}")
+    print(f"Crossplay:  {'Enabled' if user_info['crossplay'] else 'Disabled'}")
     print()
 
 
