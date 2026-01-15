@@ -229,6 +229,9 @@ def wfm():
         elif action == "clear":
             clear_screen()
 
+        elif action == "exit" or action == "quit":
+            break
+
         else:
             print(f"Unknown command: '{action}'. Use 'help' to see available commands.")
 
