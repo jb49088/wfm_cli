@@ -88,7 +88,7 @@ def get_user_info(headers):
 
 
 def handle_search(args):
-    """Parse arguments and display an items listings."""
+    """Parse arguments for the search functionality."""
     item = args[0]
 
     kwargs = {
@@ -107,11 +107,11 @@ def handle_search(args):
     if kwargs["rank"]:
         kwargs["rank"] = int(kwargs["rank"])
 
-    display_item_listings(item=item, **kwargs)
+    return item, kwargs
 
 
-def handle_listings(args, user_info):
-    """Parse arguments and display the authenticated users listings."""
+def handle_listings(args):
+    """Parse arguments for displaying the currently authenticated user's listings."""
     kwargs = {
         "sort": "updated",
         "order": None,
@@ -126,7 +126,7 @@ def handle_listings(args, user_info):
     if kwargs["rank"]:
         kwargs["rank"] = int(kwargs["rank"])
 
-    display_user_listings(user=user_info["slug"], **kwargs)
+    return kwargs
 
 
 def handle_profile(user_info):
@@ -154,9 +154,7 @@ def wfm():
         ensure_cookies_file(cookies)
 
     cookies = load_cookies()
-
     authenticated_headers = build_authenticated_headers(cookies)
-
     user_info = get_user_info(authenticated_headers)
 
     session = PromptSession(history=FileHistory(HISTORY_FILE))
@@ -174,10 +172,12 @@ def wfm():
         args = parts[1:]
 
         if action == "search":
-            handle_search(args)
+            item, kwargs = handle_search(args)
+            display_item_listings(item, **kwargs)
 
         elif action == "listings":
-            handle_listings(args, user_info)
+            kwargs = handle_listings(args)
+            display_user_listings(user=user_info["slug"], **kwargs)
 
         elif action == "profile":
             handle_profile(user_info)
