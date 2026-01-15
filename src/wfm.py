@@ -113,7 +113,7 @@ def handle_search(args):
 def handle_listings(args, user_info):
     """Parse arguments and display the authenticated users listings."""
     kwargs = {
-        "sort": "price",
+        "sort": "updated",
         "order": None,
         "rank": None,
     }
@@ -139,7 +139,7 @@ def handle_profile(user_info):
         "mobile": "Mobile",
     }
 
-    print(f"{user_info['ingameName']}")
+    print(f"Username: {user_info['ingameName']}")
     print(f"Reputation: {user_info['reputation']}")
     print(f"Platform: {platform_mapping[user_info['platform']]}")
     print(f"Crossplay: {'Enabled' if user_info['crossplay'] else 'Disabled'}")
