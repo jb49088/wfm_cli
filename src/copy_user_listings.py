@@ -1,10 +1,8 @@
 import pyperclip
 
 from utils import (
-    build_id_to_name_mapping,
     extract_user_listings,
     filter_listings,
-    get_all_items,
     sort_listings,
 )
 
@@ -108,10 +106,10 @@ def copy_to_clipboard(chunks):
             print(f"Chunk {i}/{len(chunks)} copied ({len(chunk)} chars).")
 
 
-def copy_user_listings(user, rank=None, in_game=False, sort="updated", order=None):
+def copy_user_listings(
+    all_items, id_to_name, user, rank=None, in_game=False, sort="updated", order=None
+):
     """Main entry point."""
-    all_items = get_all_items()
-    id_to_name = build_id_to_name_mapping(all_items)
     user_listings = extract_user_listings(user, id_to_name)
     filtered_user_listings = filter_listings(user_listings, rank, in_game)
     sorted_user_listings, _, _ = sort_listings(

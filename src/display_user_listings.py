@@ -1,13 +1,10 @@
 import pyperclip
 
 from utils import (
-    build_id_to_name_mapping,
-    build_name_to_max_rank_mapping,
     determine_widths,
     display_listings,
     extract_user_listings,
     filter_listings,
-    get_all_items,
     sort_listings,
 )
 
@@ -65,11 +62,10 @@ def copy_listing(user, data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_user_listings(user, rank=None, sort="updated", order=None):
+def display_user_listings(
+    id_to_name, max_ranks, user, rank=None, sort="updated", order=None
+):
     """Main entry point."""
-    all_items = get_all_items()
-    id_to_name = build_id_to_name_mapping(all_items)
-    max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
     user_listings = extract_user_listings(user, id_to_name)
     filtered_item_listings = filter_listings(user_listings, rank, status="all")
     sorted_user_listings, sort, order = sort_listings(

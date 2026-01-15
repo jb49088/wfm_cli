@@ -3,12 +3,9 @@ import requests
 
 from config import BROWSER_HEADERS
 from utils import (
-    build_id_to_name_mapping,
-    build_name_to_max_rank_mapping,
     determine_widths,
     display_listings,
     filter_listings,
-    get_all_items,
     sort_listings,
 )
 
@@ -105,11 +102,10 @@ def copy_listing(data_rows):
     print(f"Listing {listing} not found")
 
 
-def display_item_listings(item, sort="price", order=None, rank=None, status="ingame"):
+def display_item_listings(
+    id_to_name, max_ranks, item, sort="price", order=None, rank=None, status="ingame"
+):
     """Main entry point."""
-    all_items = get_all_items()
-    id_to_name = build_id_to_name_mapping(all_items)
-    max_ranks = build_name_to_max_rank_mapping(all_items, id_to_name)
     item_slug = slugify_item_name(item)
     item_listings = extract_item_listings(item_slug, id_to_name)
     filtered_item_listings = filter_listings(item_listings, rank, status)

@@ -21,26 +21,6 @@ def clear_screen():
     print("\033[2J\033[H", end="")
 
 
-def get_all_items():
-    """Extract all raw item data."""
-    r = requests.get(
-        url="https://api.warframe.market/v2/items", headers=BROWSER_HEADERS
-    )
-    r.raise_for_status()
-
-    return r.json()["data"]
-
-
-def build_id_to_name_mapping(all_items):
-    """Build a mapping from item ID to in game name."""
-    return {item["id"]: item["i18n"]["en"]["name"] for item in all_items}
-
-
-def build_name_to_max_rank_mapping(all_items, id_to_name):
-    """Build a mapping from item name to max rank."""
-    return {id_to_name[item["id"]]: item.get("maxRank") for item in all_items}
-
-
 def extract_user_listings(user, id_to_name):
     """Extract and process listings for a specific user."""
     r = requests.get(

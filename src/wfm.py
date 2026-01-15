@@ -87,6 +87,16 @@ def get_user_info(headers):
     }
 
 
+def get_all_items():
+    """Extract all raw item data."""
+    r = requests.get(
+        url="https://api.warframe.market/v2/items", headers=BROWSER_HEADERS
+    )
+    r.raise_for_status()
+
+    return r.json()["data"]
+
+
 def handle_search(args):
     """Parse arguments for the search functionality."""
     item = args[0]
@@ -157,6 +167,10 @@ def wfm():
     authenticated_headers = build_authenticated_headers(cookies)
     user_info = get_user_info(authenticated_headers)
 
+    all_items = get_all_items()
+    id_to_name = {item["id"]: item["i18n"]["en"]["name"] for item in all_items}
+    max_ranks = {id_to_name[item["id"]]: item.get("maxRank") for item in all_items}
+
     session = PromptSession(history=FileHistory(HISTORY_FILE))
 
     status = "\033[32mIn Game\033[0m"
@@ -173,11 +187,11 @@ def wfm():
 
         if action == "search":
             item, kwargs = handle_search(args)
-            display_item_listings(item, **kwargs)
+            display_item_listings(id_to_name, max_ranks, item, **kwargs)
 
         elif action == "listings":
             kwargs = handle_listings(args)
-            display_user_listings(user=user_info["slug"], **kwargs)
+            display_user_listings(id_to_name, max_ranks, user_info["slug"], **kwargs)
 
         elif action == "profile":
             handle_profile(user_info)
