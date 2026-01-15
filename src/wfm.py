@@ -29,7 +29,7 @@ def ensure_app_dir():
     APP_DIR.mkdir(exist_ok=True)
 
 
-def get_cookies():
+def prompt_for_cookies():
     """Prompt user for JWT token and CF clearance."""
     cookies = {
         "jwt": input("Enter your JWT token: "),
@@ -41,7 +41,14 @@ def get_cookies():
 
 def ensure_cookies_file(cookies):
     """Make sure the config file exists."""
-    COOKIES_FILE.write_text(json.dumps(cookies, indent=2))
+    with COOKIES_FILE.open("w") as f:
+        json.dump(cookies, f)
+
+
+def load_cookies():
+    """Load cookies from the config file."""
+    with COOKIES_FILE.open() as f:
+        return json.load(f)
 
 
 def handle_search(args):
@@ -72,8 +79,10 @@ def wfm():
     ensure_app_dir()
 
     if not COOKIES_FILE.exists():
-        cookies = get_cookies()
+        cookies = prompt_for_cookies()
         ensure_cookies_file(cookies)
+
+    cookies = load_cookies()
 
     session = PromptSession(history=FileHistory(HISTORY_FILE))
 
