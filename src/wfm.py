@@ -110,6 +110,24 @@ def handle_search(args):
     display_item_listings(item=item, **kwargs)
 
 
+def handle_listings(args, user_info):
+    kwargs = {
+        "sort": "price",
+        "order": None,
+        "rank": None,
+    }
+
+    pairs = zip(args[::2], args[1::2])
+
+    for key, value in pairs:
+        kwargs[key] = value
+
+    if kwargs["rank"]:
+        kwargs["rank"] = int(kwargs["rank"])
+
+    display_user_listings(user=user_info["slug"], **kwargs)
+
+
 def wfm():
     """Main entry point for wfm."""
     ensure_app_dir()
@@ -140,6 +158,9 @@ def wfm():
 
         if action == "search":
             handle_search(args)
+
+        elif action == "listings":
+            handle_listings(args, user_info)
 
         elif action == "clear":
             clear_screen()
