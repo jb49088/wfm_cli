@@ -1,3 +1,5 @@
+from typing import Any
+
 import pyperclip
 
 from utils import (
@@ -16,7 +18,7 @@ DEFAULT_ORDERS = {
 }
 
 
-def get_base_name(item_name):
+def get_base_name(item_name: str) -> str:
     """Extract base name without part suffixes."""
     part_words = [
         "Set",
@@ -45,7 +47,9 @@ def get_base_name(item_name):
     return " ".join(words)
 
 
-def expand_item_sets(user_listings, all_items):
+def expand_item_sets(
+    user_listings: list[dict[str, Any]], all_items: list[dict[str, Any]]
+) -> list[str]:
     """Expand set items into individual parts for the set."""
     expanded_listings = []
 
@@ -63,7 +67,7 @@ def expand_item_sets(user_listings, all_items):
     return expanded_listings
 
 
-def convert_listings_to_links(listings):
+def convert_listings_to_links(listings: list[str]) -> list[str]:
     """Process and format item names for ingame pasting."""
     return [
         f"[{listing.replace(' Blueprint', '')}]"
@@ -73,7 +77,7 @@ def convert_listings_to_links(listings):
     ]
 
 
-def chunk_links(links):
+def chunk_links(links: list[str]) -> list[str]:
     """Break item list into 300 character chunks."""
     chunks = []
     current_chunk = []
@@ -94,7 +98,7 @@ def chunk_links(links):
     return chunks
 
 
-def copy_to_clipboard(chunks):
+def copy_to_clipboard(chunks: list[str]) -> None:
     """Copy items to clipboard."""
     for i, chunk in enumerate(chunks, 1):
         pyperclip.copy(chunk)
@@ -107,12 +111,17 @@ def copy_to_clipboard(chunks):
 
 
 def copy_user_listings(
-    all_items, id_to_name, user, rank=None, in_game=False, sort="updated", order=None
+    all_items: list[dict[str, Any]],
+    id_to_name: dict[str, str],
+    user: str,
+    rank: int | None = None,
+    sort: str = "updated",
+    order: str | None = None,
 ):
     """Main entry point."""
     user_listings = extract_user_listings(user, id_to_name)
-    filtered_user_listings = filter_listings(user_listings, rank, in_game)
-    sorted_user_listings, _, _ = sort_listings(
+    filtered_user_listings = filter_listings(user_listings, rank, status="all")
+    (sorted_user_listings, _) = sort_listings(
         filtered_user_listings, sort, order, DEFAULT_ORDERS
     )
     expanded_listings = expand_item_sets(sorted_user_listings, all_items)

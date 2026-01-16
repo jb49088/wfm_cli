@@ -8,6 +8,7 @@
 import json
 import shlex
 from pathlib import Path
+from typing import Any
 
 import requests
 from prompt_toolkit import ANSI, PromptSession
@@ -29,7 +30,7 @@ def ensure_app_dir() -> None:
     APP_DIR.mkdir(exist_ok=True)
 
 
-def prompt_for_cookies():
+def prompt_for_cookies() -> dict[str, str]:
     """Prompt user for JWT token and CF clearance."""
     cookies = {
         "jwt": input("Enter your JWT token: "),
@@ -39,19 +40,19 @@ def prompt_for_cookies():
     return cookies
 
 
-def ensure_cookies_file(cookies):
+def ensure_cookies_file(cookies: dict[str, str]) -> None:
     """Make sure the config file exists."""
     with COOKIES_FILE.open("w") as f:
         json.dump(cookies, f)
 
 
-def load_cookies():
+def load_cookies() -> dict[str, str]:
     """Load cookies from the config file."""
     with COOKIES_FILE.open() as f:
         return json.load(f)
 
 
-def build_authenticated_headers(cookies):
+def build_authenticated_headers(cookies: dict[str, str]) -> dict[str, str]:
     """Build authenticated headers with cookies."""
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -69,7 +70,7 @@ def build_authenticated_headers(cookies):
     return headers
 
 
-def get_user_info(headers):
+def get_user_info(headers: dict[str, str]) -> dict[str, Any]:
     """Get the authenticated users profile info."""
     r = requests.get(url="https://api.warframe.market/v2/me", headers=headers)
     r.raise_for_status()
@@ -85,7 +86,7 @@ def get_user_info(headers):
     }
 
 
-def get_all_items():
+def get_all_items() -> list[dict[str, Any]]:
     """Extract all raw item data."""
     r = requests.get(
         url="https://api.warframe.market/v2/items", headers=BROWSER_HEADERS
@@ -95,15 +96,17 @@ def get_all_items():
     return r.json()["data"]
 
 
-def build_id_to_name_mapping(all_items):
+def build_id_to_name_mapping(all_items: list[dict[str, Any]]) -> dict[str, str]:
     return {item["id"]: item["i18n"]["en"]["name"] for item in all_items}
 
 
-def build_name_to_max_rank_mapping(all_items, id_to_name):
+def build_name_to_max_rank_mapping(
+    all_items: list[dict[str, Any]], id_to_name: dict[str, str]
+) -> dict[str, int | None]:
     return {id_to_name[item["id"]]: item.get("maxRank") for item in all_items}
 
 
-def handle_search(args):
+def handle_search(args: list[str]) -> tuple[str, dict[str, Any]]:
     """Parse arguments for the search functionality."""
     item = args[0]
 
@@ -126,7 +129,7 @@ def handle_search(args):
     return item, kwargs
 
 
-def handle_listings(args):
+def handle_listings(args: list[str]) -> dict[str, Any]:
     """Parse arguments for displaying the currently authenticated user's listings."""
     kwargs = {
         "sort": "updated",
@@ -145,7 +148,7 @@ def handle_listings(args):
     return kwargs
 
 
-def display_profile(user_info):
+def display_profile(user_info: dict[str, Any]) -> None:
     """Display basic profile info for the authenticated user."""
     platform_mapping = {
         "pc": "PC",
@@ -162,7 +165,7 @@ def display_profile(user_info):
     print()
 
 
-def display_help():
+def display_help() -> None:
     """Display all commands and example usage."""
     print()
     print("Available commands:")
@@ -188,7 +191,7 @@ def display_help():
     print()
 
 
-def wfm():
+def wfm() -> None:
     """Main entry point for wfm."""
     ensure_app_dir()
 

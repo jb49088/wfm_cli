@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 
 from config import BROWSER_HEADERS
@@ -18,11 +20,13 @@ COLUMNS = [
 ARROW_MAPPING = {"desc": "↓", "asc": "↑"}
 
 
-def clear_screen():
+def clear_screen() -> None:
     print("\033[2J\033[H", end="")
 
 
-def extract_user_listings(user, id_to_name):
+def extract_user_listings(
+    user: str, id_to_name: dict[str, str]
+) -> list[dict[str, Any]]:
     """Extract and process listings for a specific user."""
     r = requests.get(
         url=f"https://api.warframe.market/v2/orders/user/{user.lower()}",
@@ -49,8 +53,9 @@ def extract_user_listings(user, id_to_name):
     return user_listings
 
 
-def filter_listings(listings, rank, status):
-    """Filter listings."""
+def filter_listings(
+    listings: list[dict[str, Any]], rank: int | None, status: str
+) -> list[dict[str, Any]]:
     if rank is not None:
         listings = [listing for listing in listings if listing.get("rank") == rank]
     if status != "all":
@@ -59,8 +64,12 @@ def filter_listings(listings, rank, status):
     return listings
 
 
-def sort_listings(listings, sort_by, order, default_orders):
-    """Sort listings."""
+def sort_listings(
+    listings: list[dict[str, Any]],
+    sort_by: str,
+    order: str | None,
+    default_orders: dict[str, str],
+) -> tuple[list[dict[str, Any]], str]:
     if order is None:
         order = default_orders[sort_by]
 
@@ -85,10 +94,10 @@ def sort_listings(listings, sort_by, order, default_orders):
         reverse=is_desc,
     )
 
-    return (sorted_listings, sort_by, order)
+    return (sorted_listings, order)
 
 
-def determine_widths(data_rows, sort_by):
+def determine_widths(data_rows: list[dict[str, Any]], sort_by: str) -> dict[str, int]:
     """Determine maximum width for each colunm."""
     active_columns = [col for col in COLUMNS if any(col in row for row in data_rows)]
 
@@ -108,12 +117,18 @@ def determine_widths(data_rows, sort_by):
     return column_widths
 
 
-def display_listings(data_rows, column_widths, right_alligned_columns, sort_by, order):
+def display_listings(
+    data_rows: list[dict[str, Any]],
+    column_widths: dict[str, int],
+    right_alligned_columns: tuple[str, ...],
+    sort_by: str,
+    sort_order: str,
+) -> None:
     """Display listings in a sql-like table."""
     separator_row = ["-" * width for width in column_widths.values()]
 
     header_row = [
-        f"{key} {ARROW_MAPPING[order]}".title().center(width)
+        f"{key} {ARROW_MAPPING[sort_order]}".title().center(width)
         if key == sort_by
         else key.title().center(width)
         for key, width in column_widths.items()
