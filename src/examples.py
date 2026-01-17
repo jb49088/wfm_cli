@@ -1,4 +1,4 @@
-SAMPLE_ITEM = {
+ITEM = {
     "id": "54a74454e779892d5e51562f",
     "slug": "ammo_drum",
     "gameRef": "/Lotus/Upgrades/Mods/Rifle/WeaponAmmoMaxMod",
@@ -13,7 +13,7 @@ SAMPLE_ITEM = {
     },
 }
 
-SAMPLE_USER_LISTING = {
+USER_LISTING = {
     "item": "Ammo Drum",
     "itemId": "54a74454e779892d5e51562f",
     "price": 1000,
@@ -22,7 +22,7 @@ SAMPLE_USER_LISTING = {
     "updated": "2026-01-17T00:18:38Z",
 }
 
-SAMPLE_ITEM_LISTING = {
+ITEM_LISTING = {
     "seller": "bhwsg",
     "reputation": 27,
     "status": "ingame",
