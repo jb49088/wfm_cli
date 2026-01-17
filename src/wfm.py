@@ -18,7 +18,7 @@ from config import BROWSER_HEADERS
 from copy_user_listings import copy_user_listings
 from listings import listings
 from search import copy, search
-from utils import clear_screen
+from utils import build_authenticated_headers, clear_screen
 
 APP_DIR = Path.home() / ".wfm"
 COOKIES_FILE = APP_DIR / "cookies.json"
@@ -50,24 +50,6 @@ def load_cookies() -> dict[str, str]:
     """Load cookies from the config file."""
     with COOKIES_FILE.open() as f:
         return json.load(f)
-
-
-def build_authenticated_headers(cookies: dict[str, str]) -> dict[str, str]:
-    """Build authenticated headers with cookies."""
-    headers = {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-        "Referer": "https://warframe.market/",
-        "language": "en",
-        "platform": "pc",
-        "crossplay": "true",
-        "Origin": "https://warframe.market",
-        "Cookie": f"JWT={cookies['jwt']}; cf_clearance={cookies['cf']}",
-    }
-
-    headers.update(BROWSER_HEADERS)
-
-    return headers
 
 
 def get_user_info(headers: dict[str, str]) -> dict[str, Any]:
@@ -238,7 +220,11 @@ def wfm() -> None:
         elif action == "listings":
             kwargs = handle_listings(args)
             current_listings = listings(
-                id_to_name, max_ranks, user_info["slug"], **kwargs
+                id_to_name,
+                max_ranks,
+                user_info["slug"],
+                authenticated_headers,
+                **kwargs,
             )
 
         elif action == "profile":
