@@ -16,8 +16,8 @@ from prompt_toolkit.history import FileHistory
 
 from config import BROWSER_HEADERS
 from copy_user_listings import copy_user_listings
-from display_item_listings import display_item_listings
-from display_user_listings import display_user_listings
+from listings import listings
+from search import copy, search
 from utils import clear_screen
 
 APP_DIR = Path.home() / ".wfm"
@@ -183,11 +183,21 @@ def display_help() -> None:
     print("      Example: listings sort price")
     print("      Example: listings rank 0 sort updated order desc")
     print()
+    print("  copy <number>")
+    print("      Copy a listing whisper message to clipboard")
+    print("      Example: copy 3")
+    print()
     print("  profile")
     print("      Display your account information")
     print()
+    print("  clear")
+    print("      Clear the screen")
+    print()
     print("  help")
     print("      Show this help message")
+    print()
+    print("  exit, quit")
+    print("      Exit the program")
     print()
 
 
@@ -223,26 +233,33 @@ def wfm() -> None:
 
         if action == "search":
             item, kwargs = handle_search(args)
-            display_item_listings(id_to_name, max_ranks, item, **kwargs)
+            current_listings = search(id_to_name, max_ranks, item, **kwargs)
 
         elif action == "listings":
             kwargs = handle_listings(args)
-            display_user_listings(id_to_name, max_ranks, user_info["slug"], **kwargs)
+            current_listings = listings(
+                id_to_name, max_ranks, user_info["slug"], **kwargs
+            )
 
         elif action == "profile":
             display_profile(user_info)
 
-        elif action == "help":
-            display_help()
+        elif action == "copy":
+            copy(args[0], current_listings)
 
         elif action == "clear":
             clear_screen()
+
+        elif action == "help":
+            display_help()
 
         elif action == "exit" or action == "quit":
             break
 
         else:
-            print(f"Unknown command: '{action}'. Use 'help' to see available commands.")
+            print(
+                f"\nUnknown command: '{action}'. Use 'help' to see available commands.\n"
+            )
 
 
 if __name__ == "__main__":

@@ -47,38 +47,16 @@ def build_rows(
     return data_rows
 
 
-def copy_listing(user: str, data_rows: list[dict[str, str]]) -> None:
-    """Prompt for and copy a listing."""
-    listing = input("Listing to copy: ").strip()
-
-    for row in data_rows:
-        if row["#"] == listing:
-            segments = [
-                "WTB",
-                f"{row['item']}",
-                f"Rank: {row['rank']}" if row.get("rank") else "",
-                f"Price: {row['price']}",
-            ]
-            segments = [s for s in segments if s]
-            message = f"/w {user} {' | '.join(segments)}"
-            pyperclip.copy(message)
-            print(f"Copied to clipboard: {message}")
-            return
-
-    print(f"Listing {listing} not found")
-
-
-def display_user_listings(
+def listings(
     id_to_name: dict[str, str],
     max_ranks: dict[str, int | None],
     user: str,
     rank: int | None = None,
     sort: str = "updated",
     order: str | None = None,
-) -> None:
+) -> list[dict[str, Any]]:
     """Main entry point."""
     user_listings = extract_user_listings(user, id_to_name)
-    breakpoint()
     filtered_item_listings = filter_listings(user_listings, rank, status="all")
     sorted_user_listings, sort_order = sort_listings(
         filtered_item_listings, sort, order, DEFAULT_ORDERS
@@ -86,3 +64,5 @@ def display_user_listings(
     data_rows = build_rows(sorted_user_listings, max_ranks)
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, sort_order)
+
+    return sorted_user_listings

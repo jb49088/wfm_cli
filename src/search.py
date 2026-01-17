@@ -87,28 +87,26 @@ def build_rows(
     return data_rows
 
 
-def copy_listing(data_rows: list[dict[str, str]]) -> None:
+def copy(listing: str, listings: list[dict[str, Any]]) -> None:
     """Copy a listing for in-game whispering."""
-    listing = input("> ")
+    listing_to_copy = listings[int(listing) - 1]
+    segments = [
+        "WTB",
+        f"{listing_to_copy['item']}",
+        f"Rank: {listing_to_copy['rank']}"
+        if listing_to_copy.get("rank") is not None
+        else "",
+        f"Price: {listing_to_copy['price']}",
+    ]
+    segments = [s for s in segments if s]
+    message = f"/w {listing_to_copy['seller']} {' | '.join(segments)}"
 
-    for row in data_rows:
-        if row["#"] == listing:
-            segments = [
-                "WTB",
-                f"{row['item']}",
-                f"Rank: {row['rank']}" if row.get("rank") else "",
-                f"Price: {row['price']}",
-            ]
-            segments = [s for s in segments if s]
-            message = f"/w {row['seller']} {' | '.join(segments)}"
-            pyperclip.copy(message)
-            print(f"Copied to clipboard: {message}")
-            return
+    pyperclip.copy(message)
 
-    print(f"Listing {listing} not found")
+    print(f"\nCopied to clipboard: {message}\n")
 
 
-def display_item_listings(
+def search(
     id_to_name: dict[str, str],
     max_ranks: dict[str, int | None],
     item: str,
@@ -116,7 +114,7 @@ def display_item_listings(
     sort: str = "price",
     order: str | None = None,
     status: str = "ingame",
-) -> None:
+) -> list[dict[str, Any]]:
     """Main entry point."""
     item_slug = slugify_item_name(item)
     item_listings = extract_item_listings(item_slug, id_to_name)
@@ -127,3 +125,5 @@ def display_item_listings(
     data_rows = build_rows(sorted_item_listings, max_ranks)
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, sort_order)
+
+    return sorted_item_listings
