@@ -150,7 +150,7 @@ def handle_seller(args: list[str]) -> dict[str, Any]:
     return kwargs
 
 
-def change_visibility(visibility: bool, id: str, headers: dict[str, str]):
+def change_visibility(visibility: bool, id: str, headers: dict[str, str]) -> None:
     r = requests.patch(
         url=f"https://api.warframe.market/v2/order/{id}",
         json={"visible": visibility},
@@ -159,7 +159,7 @@ def change_visibility(visibility: bool, id: str, headers: dict[str, str]):
     r.raise_for_status()
 
 
-def change_all_visibility(visibility: bool, headers: dict[str, str]):
+def change_all_visibility(visibility: bool, headers: dict[str, str]) -> None:
     r = requests.patch(
         url="https://api.warframe.market/v2/orders/group/all",
         json={"type": "sell", "visible": visibility},
