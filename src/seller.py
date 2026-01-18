@@ -19,7 +19,7 @@ DEFAULT_ORDERS = {
     "updated": "desc",
 }
 
-RIGHT_ALLIGNED_COLUMNS = ("price", "rank", "quantity")
+RIGHT_ALLIGNED_COLUMNS = ("price", "quantity")
 
 
 def extract_seller_listings(

@@ -23,7 +23,7 @@ DEFAULT_ORDERS = {
     "updated": "desc",
 }
 STATUS_MAPPING = {"offline": "Offline", "online": "Online", "ingame": "In Game"}
-RIGHT_ALLIGNED_COLUMNS = ("price", "rank", "quantity", "reputation")
+RIGHT_ALLIGNED_COLUMNS = ("price", "quantity", "reputation")
 
 
 def slugify_item_name(item: str) -> str:
