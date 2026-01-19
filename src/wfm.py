@@ -4,6 +4,7 @@
 
 # TODO: implement status changing
 # TODO: implemnt sync feature
+# TODO: implement back command
 
 import json
 import shlex
@@ -370,6 +371,7 @@ def wfm() -> None:
         elif action == "add":
             kwargs = handle_add(args, name_to_id)
             add_listing(authenticated_headers, **kwargs)
+            print("\nListing added.\n")
 
         elif action == "show":
             if args[0] == "all":
