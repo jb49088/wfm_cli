@@ -3,7 +3,7 @@
 # ================================================================================
 
 # TODO: implement status changing
-# TODO: implement copying, deleting, going to sellers listings
+# TODO: implemnt sync feature
 
 import json
 import shlex
