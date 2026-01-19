@@ -11,6 +11,7 @@ import shlex
 from pathlib import Path
 from typing import Any
 
+import pyperclip
 import requests
 from prompt_toolkit import ANSI, PromptSession
 from prompt_toolkit.history import FileHistory
@@ -18,7 +19,7 @@ from prompt_toolkit.history import FileHistory
 from config import BROWSER_HEADERS
 from copy_user_listings import copy_user_listings
 from listings import listings
-from search import copy, search
+from search import search
 from seller import seller
 from utils import build_authenticated_headers, clear_screen
 
@@ -249,6 +250,27 @@ def edit_listing(
         },
     )
     r.raise_for_status()
+
+
+def copy(listing_to_copy: dict[str, Any], max_ranks: dict[str, int | None]) -> None:
+    """Copy a listing for in-game whispering."""
+    item_name = listing_to_copy["item"]
+
+    if listing_to_copy.get("rank") is not None:
+        item_name = (
+            f"{item_name} (rank {listing_to_copy['rank']}/{max_ranks[item_name]})"
+        )
+
+    segments = [
+        "WTB",
+        item_name,
+        f"{listing_to_copy['price']}p",
+    ]
+    message = f"/w {listing_to_copy['seller']} {' | '.join(segments)}"
+
+    pyperclip.copy(message)
+
+    print(f"\nCopied to clipboard: {message}\n")
 
 
 def display_profile(user_info: dict[str, Any]) -> None:
