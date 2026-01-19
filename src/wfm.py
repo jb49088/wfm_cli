@@ -388,7 +388,7 @@ def wfm() -> None:
                 print("\nAll listings are now hidden.\n")
             else:
                 listing_id = current_listings[int(args[0]) - 1]["id"]
-                change_visibility(listing_id, True, authenticated_headers)
+                change_visibility(listing_id, False, authenticated_headers)
                 print(f"\nListing {args[0]} is now hidden.\n")
 
         elif action == "delete":
