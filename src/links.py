@@ -32,6 +32,8 @@ def get_base_name(item_name: str) -> str:
         "Systems",
         "Link",
         "Wings",
+        "Pouch",
+        "Stars",
         "Harness",
         "Grip",
         "Blade",
