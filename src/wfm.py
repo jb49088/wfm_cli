@@ -2,7 +2,6 @@
 # =                                     WFM                                      =
 # ================================================================================
 
-# TODO: implement status changing
 # TODO: implemnt sync feature
 # TODO: implement cookies checking
 # TODO: implement project-wide error handling
@@ -10,7 +9,6 @@
 import asyncio
 import json
 import shlex
-from asyncio import QueueEmpty
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +28,9 @@ from utils import build_authenticated_headers, build_cookie_header, clear_screen
 APP_DIR = Path.home() / ".wfm"
 COOKIES_FILE = APP_DIR / "cookies.json"
 HISTORY_FILE = APP_DIR / "history"
+
+WS_URI = "wss://ws.warframe.market/socket"
+AUTH_MESSAGE = '{"route":"@wfm|cmd/auth/signIn","payload":{"token":""}}'
 
 STATUS_MAPPING = {
     "invisible": "\033[31mInvisible\033[0m",  # Red
@@ -352,37 +353,44 @@ def display_help() -> None:
 
 async def open_websocket(
     cookie_header: dict[str, str],
-    status: dict[str, str],
+    state: dict[str, str],
     initial_status_event: asyncio.Event,
     status_queue: asyncio.Queue,
 ) -> None:
-    """Connect to WebSocket, set initial status, then keep updating."""
+    """Connect to WebSocket, authenticate, and manage status updates."""
     async with websockets.connect(
-        uri="wss://ws.warframe.market/socket",
-        additional_headers={**cookie_header},
+        uri=WS_URI,
+        additional_headers=cookie_header,
     ) as ws:
-        await ws.send('{"route":"@wfm|cmd/auth/signIn","payload":{"token":""}}')
+        await ws.send(AUTH_MESSAGE)
 
-        shared = {"current_response_event": None}
+        current_response_event = None
 
-        async def sender():
+        async def send_status_updates():
+            """Send status updates from the queue to the WebSocket."""
+            nonlocal current_response_event
+
             while True:
-                status_message, status_response_event = await status_queue.get()
+                status_message, response_event = await status_queue.get()
                 await ws.send(status_message)
-                shared["current_response_event"] = status_response_event
+                current_response_event = response_event
 
-        async def receiver():
+        async def receive_messages():
+            nonlocal current_response_event
+
             while True:
                 message = json.loads(await ws.recv())
                 payload_status = message.get("payload", {}).get("status")
-                if payload_status:
-                    status["status"] = payload_status
-                    initial_status_event.set()
-                    if shared["current_response_event"]:
-                        shared["current_response_event"].set()
-                        shared["current_response_event"] = None
 
-        await asyncio.gather(receiver(), sender())
+                if payload_status:
+                    state["status"] = payload_status
+                    initial_status_event.set()
+
+                    if current_response_event:
+                        current_response_event.set()
+                        current_response_event = None
+
+        await asyncio.gather(receive_messages(), send_status_updates())
 
 
 async def wfm() -> None:
@@ -400,12 +408,12 @@ async def wfm() -> None:
     async with aiohttp.ClientSession() as session:
         initial_status_event = asyncio.Event()
         status_queue = asyncio.Queue()
-        status = {"status": "invisible"}
+        state = {}
 
         websocket_task = asyncio.create_task(
             open_websocket(
                 cookie_header,
-                status,
+                state,
                 initial_status_event,
                 status_queue,
             )
@@ -429,7 +437,7 @@ async def wfm() -> None:
         while True:
             try:
                 cmd = await prompt_session.prompt_async(
-                    ANSI(f"wfm [{STATUS_MAPPING[status['status']]}]> ")
+                    ANSI(f"wfm [{STATUS_MAPPING[state['status']]}]> ")
                 )
             except (KeyboardInterrupt, EOFError):
                 websocket_task.cancel()
