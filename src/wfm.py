@@ -359,16 +359,16 @@ async def open_websocket(
     ) as ws:
         await ws.send('{"route":"@wfm|cmd/auth/signIn","payload":{"token":""}}')
 
-        first_status_message = True
+        waiting_for_initial_status = True
         while True:
             try:
                 message = json.loads(await ws.recv())
                 if message.get("payload", {}).get("status"):
                     status[0] = message["payload"]["status"]
 
-                    if first_status_message:
+                    if waiting_for_initial_status:
                         ready_event.set()
-                        first_status_message = False
+                        waiting_for_initial_status = False
 
             except websockets.ConnectionClosed:
                 break
