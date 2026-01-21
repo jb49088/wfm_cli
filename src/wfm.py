@@ -31,7 +31,7 @@ COOKIES_FILE = APP_DIR / "cookies.json"
 HISTORY_FILE = APP_DIR / "history"
 
 STATUS_MAPPING = {
-    "invisible": "\033[31mOffline\033[0m",  # Red
+    "invisible": "\033[31mInvisible\033[0m",  # Red
     "online": "\033[34mOnline\033[0m",  # Blue
     "ingame": "\033[32mIn Game\033[0m",  # Green
 }
