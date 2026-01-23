@@ -1,3 +1,6 @@
+import subprocess
+import sys
+from pathlib import Path
 from typing import Any
 
 import aiohttp
@@ -231,3 +234,97 @@ async def links(
     links = _convert_listings_to_links(expanded_listings)
     link_chunks = _chunk_links(links)
     await _copy_to_clipboard(link_chunks, prompt_session)
+
+
+# ===================================== SYNC =====================================
+
+
+def get_ee_log_path() -> Path:
+    if sys.platform == "win32":
+        return Path.home() / "AppData/Local/Warframe/EE.log"
+    elif sys.platform == "linux":
+        # Check for WSL
+        try:
+            with Path("/proc/version").open("r") as f:
+                if "microsoft" in f.read().lower():
+                    username = (
+                        subprocess.check_output(["whoami.exe"], text=True)
+                        .strip()
+                        .split("\\")[-1]
+                    )
+                    return (
+                        Path("/mnt/c/Users")
+                        / username
+                        / "AppData/Local/Warframe/EE.log"
+                    )
+        except FileNotFoundError:
+            pass
+        # Native linux
+        return (
+            Path.home()
+            / ".steam/steam/steamapps/compatdata/230410/pfx/drive_c/users/steamuser/AppData/Local/Warframe/EE.log"
+        )
+    else:
+        raise RuntimeError(f"\nUnsupported platform: {sys.platform}\n")
+
+
+def extract_trade_chunks(lines: list[str]) -> list[list[str]]:
+    trade_chunks = []
+    current_chunk = []
+    recording = False
+
+    for line in lines:
+        if "Are you sure you want to accept this trade?" in line:
+            recording = True
+            current_chunk = [line]
+
+        elif "The trade was successful!" in line and recording:
+            current_chunk.append(line)
+            trade_chunks.append(current_chunk)
+            recording = False
+
+        elif recording:
+            current_chunk.append(line)
+
+    return trade_chunks
+
+
+def parse_trade_items(
+    trade_chunks: list[list[str]],
+) -> list[dict[str, tuple[str, ...]]]:
+    parsed_trades = []
+    for chunk in trade_chunks:
+        offered_items = []
+        received_items = []
+        in_offer_section = False
+        in_receive_section = False
+
+        for line in chunk:
+            if "offering" in line:
+                in_offer_section = True
+            elif "receive" in line:
+                in_offer_section = False
+                in_receive_section = True
+            elif "Confirm_Item_Cancel" in line:
+                received_items.append(line.split(",")[0])
+                in_receive_section = False
+            elif in_offer_section:
+                offered_items.append(line)
+            elif in_receive_section:
+                received_items.append(line)
+
+        parsed_trades.append(
+            {
+                "offered": tuple(item for item in offered_items if item),
+                "received": tuple(item for item in received_items if item),
+            }
+        )
+
+    return parsed_trades
+
+
+def sync():
+    ee_log_path = get_ee_log_path()
+    lines = ee_log_path.read_text().splitlines()
+    trade_chunks = extract_trade_chunks(lines)
+    trades = parse_trade_items(trade_chunks)
