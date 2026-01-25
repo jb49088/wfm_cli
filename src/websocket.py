@@ -31,6 +31,7 @@ async def open_websocket(
                 current_response_event = response_event
 
         async def receive_messages():
+            """Receive messages from the WebSocket."""
             nonlocal current_response_event
 
             while True:

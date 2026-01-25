@@ -46,7 +46,7 @@ from parsers import (
 from websocket import open_websocket
 
 STATUS_MAPPING = {
-    "invisible": "\033[31mInvisible\033[0m",  # Red
+    "invisible": "\033[2mInvisible\033[0m",  # Grey
     "online": "\033[34mOnline\033[0m",  # Blue
     "ingame": "\033[32mIn Game\033[0m",  # Green
 }
@@ -81,12 +81,13 @@ async def wfm() -> None:
     async with aiohttp.ClientSession() as session:
         initial_status_event = asyncio.Event()
         status_queue = asyncio.Queue()
-        state = {}
+
+        status_state = {"status": "invisible"}
 
         websocket_task = asyncio.create_task(
             open_websocket(
                 cookie_header,
-                state,
+                status_state,
                 initial_status_event,
                 status_queue,
             )
@@ -112,7 +113,7 @@ async def wfm() -> None:
         while True:
             try:
                 cmd = await prompt_session.prompt_async(
-                    ANSI(f"wfm [{STATUS_MAPPING[state['status']]}]> ")
+                    ANSI(f"wfm [{STATUS_MAPPING[status_state['status']]}]> ")
                 )
             except (KeyboardInterrupt, EOFError):
                 websocket_task.cancel()
@@ -231,7 +232,7 @@ async def wfm() -> None:
 
             elif action == "sync":
                 await sync(
-                    id_to_name, user_info["slug"], authenticated_headers, session
+                    id_to_name, user_info["slug"], session, authenticated_headers
                 )
 
             elif action == "profile":
