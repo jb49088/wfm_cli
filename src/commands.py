@@ -406,7 +406,7 @@ async def _update_listings(
 
         print()
 
-        await asyncio.sleep(0.4)  # Rate limit
+        await asyncio.sleep(0.5)  # Rate limit
 
 
 async def sync(
