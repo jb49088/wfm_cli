@@ -4,6 +4,7 @@
 
 # TODO: implement cookies checking
 # TODO: implement project-wide error handling
+# TODO: implement bumping feature
 
 import asyncio
 import json
