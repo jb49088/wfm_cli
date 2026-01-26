@@ -270,7 +270,7 @@ async def wfm() -> None:
                         listing["rank"],
                         listing["visible"],
                     )
-                    print(f"Bumped listing {args[0]}.")
+                    print(f"\nBumped listing {args[0]}.")
 
                 print()
 
