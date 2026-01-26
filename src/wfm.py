@@ -21,6 +21,7 @@ from api import (
     change_visibility,
     delete_listing,
     edit_listing,
+    extract_user_listings,
     get_all_items,
     get_user_info,
 )
@@ -35,7 +36,8 @@ from auth import (
 )
 from commands import copy, links, listings, search, seller, sync
 from config import HISTORY_FILE
-from display import clear_screen, display_help, display_profile
+from display import DEFAULT_ORDERS, clear_screen, display_help, display_profile
+from filters import sort_listings
 from parsers import (
     parse_add_args,
     parse_edit_args,
@@ -231,9 +233,47 @@ async def wfm() -> None:
                 )
                 print(f"\nListing {args[0]} updated.\n")
 
-            # elif action == "bump":
-            #     if args[0] == "all":
-            #         pass
+            elif action == "bump":
+                if args[0] == "all":
+                    print("\nBumping all listings...\n")
+                    user_listings = await extract_user_listings(
+                        session, user_info["slug"], id_to_name, authenticated_headers
+                    )
+                    sorted_listings, _ = sort_listings(
+                        user_listings, "updated", "asc", DEFAULT_ORDERS
+                    )
+                    for listing in sorted_listings:
+                        await edit_listing(
+                            session,
+                            authenticated_headers,
+                            listing["id"],
+                            listing["itemId"],
+                            id_to_tags,
+                            id_to_bulkTradable,
+                            listing["price"],
+                            listing["quantity"],
+                            listing["rank"],
+                            listing["visible"],
+                        )
+                        print(f"Bumped {listing['item']} listing.")
+                        await asyncio.sleep(0.5)  # Rate limit
+                else:
+                    listing = current_listings[int(args[0]) - 1]
+                    await edit_listing(
+                        session,
+                        authenticated_headers,
+                        listing["id"],
+                        listing["itemId"],
+                        id_to_tags,
+                        id_to_bulkTradable,
+                        listing["price"],
+                        listing["quantity"],
+                        listing["rank"],
+                        listing["visible"],
+                    )
+                    print(f"Bumped listing {args[0]}.")
+
+                print()
 
             elif action == "copy":
                 listing_to_copy = current_listings[int(args[0]) - 1]

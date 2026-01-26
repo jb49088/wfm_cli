@@ -374,7 +374,7 @@ async def _update_listings(
     headers: dict[str, str],
 ) -> None:
     """Decrement quantities or delete listings based on trade patterns in EE.log"""
-    print("\nSyncing listings...")
+    print("\nSyncing listings...\n")
     items_sold = {}
     for trade in trades:
         for item in trade["offered"]:
@@ -391,7 +391,7 @@ async def _update_listings(
 
         if new_quantity <= 0:
             await delete_listing(session, listing["id"], headers)
-            print(f"\n{item_name} listing has been deleted.")
+            print(f"{item_name} listing has been deleted.")
         else:
             await edit_listing(
                 session,
@@ -406,7 +406,7 @@ async def _update_listings(
                 listing["visible"],
             )
             print(
-                f"\n{item_name} listing quantity updated from {listing['quantity']} to {new_quantity}."
+                f"{item_name} listing quantity updated from {listing['quantity']} to {new_quantity}."
             )
 
         print()
@@ -429,7 +429,6 @@ async def sync(
     _save_sync_state(offset)
     trade_chunks = _extract_trade_chunks(lines)
     trades = _parse_trade_items(trade_chunks)
-    breakpoint()
     await _update_listings(
         id_to_tags, id_to_bulkTradable, user_listings, trades, session, headers
     )
