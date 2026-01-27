@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +28,8 @@ from display import (
     display_listings,
 )
 from filters import filter_listings, sort_listings
+
+UNICODE_RANK_PATTERN = re.compile(r"[\uE000-\uF8FF]")
 
 # ===================================== COPY =====================================
 
@@ -305,6 +308,7 @@ def _parse_trade_items(
 ) -> list[dict[str, tuple[str, ...]]]:
     def normalize_item_name(raw_name: str) -> str:
         name = raw_name.split("(")[0].strip()
+        name = re.sub(UNICODE_RANK_PATTERN, "", name).strip()
         return name
 
     parsed_trades = []
@@ -379,38 +383,49 @@ async def _update_listings(
 ) -> None:
     """Decrement quantities or delete listings based on trade patterns in EE.log"""
     print("\nSyncing listings...\n")
-    items_sold = {}
     for trade in trades:
-        for item in trade["offered"]:
-            items_sold[item] = items_sold.get(item, 0) + 1
+        candidates = []
+        for listing in listings:
+            if listing["item"] in trade["offered"]:
+                candidates.append(listing)
 
-    for listing in listings:
-        item_name = listing["item"]
-        sold_count = items_sold.get(item_name, 0)
+        if not candidates:
+            continue
 
-        if sold_count == 0:
-            continue  # Nothing sold for this item
+        plat_received = 0
+        for received_item in trade["received"]:
+            if "Platinum" in received_item:
+                plat_received += int(received_item.split()[-1])
 
-        new_quantity = listing["quantity"] - sold_count
+        item_count = trade["offered"].count(candidates[0]["item"])
 
-        if new_quantity <= 0:
-            await delete_listing(session, listing["id"], headers)
-            print(f"{item_name} listing has been deleted.")
+        plat_per_item = plat_received // item_count
+
+        candidate = min(
+            candidates, key=lambda listing: abs(plat_per_item - listing["price"])
+        )
+
+        candidate["quantity"] -= item_count
+
+        if candidate["quantity"] <= 0:
+            await delete_listing(session, candidate["id"], headers)
+            listings.remove(candidate)
+            print(f"{candidate['item']} listing has been deleted.")
         else:
             await edit_listing(
                 session,
                 headers,
-                listing["id"],
-                listing["itemId"],
+                candidate["id"],
+                candidate["itemId"],
                 id_to_tags,
                 id_to_bulkTradable,
-                listing["price"],
-                new_quantity,
-                listing["rank"],
-                listing["visible"],
+                candidate["price"],
+                candidate["quantity"],
+                candidate["rank"],
+                candidate["visible"],
             )
             print(
-                f"{item_name} listing quantity updated from {listing['quantity']} to {new_quantity}."
+                f"{candidate['item']} listing quantity updated from {candidate['quantity'] + item_count} to {candidate['quantity']}."
             )
 
         print()
