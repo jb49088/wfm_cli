@@ -289,8 +289,12 @@ def _extract_trade_chunks(lines: list[str]) -> list[list[str]]:
 
     for line in lines:
         if "Are you sure you want to accept this trade?" in line:
-            recording = True
             current_chunk = [line]
+            recording = True
+
+        elif "SendResult_MENU_CANCEL()" in line:
+            current_chunk = []
+            recording = False
 
         elif "The trade was successful!" in line and recording:
             current_chunk.append(line)
