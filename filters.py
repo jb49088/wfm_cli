@@ -23,9 +23,7 @@ def sort_listings(
 
     is_desc = order == "desc"
 
-    sorted_listings = sorted(
-        listings, key=lambda listing: listing["updated"], reverse=True
-    )
+    listings.sort(key=lambda listing: listing["updated"], reverse=True)
 
     def get_sort_key(listing):
         # Special case: user-facing sort name is "visibility" but data key is "visible"
@@ -37,10 +35,6 @@ def sort_listings(
 
         return listing[sort_by]
 
-    sorted_listings = sorted(
-        sorted_listings,
-        key=get_sort_key,
-        reverse=is_desc,
-    )
+    listings.sort(key=get_sort_key, reverse=is_desc)
 
-    return (sorted_listings, order)
+    return (listings, order)
