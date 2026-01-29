@@ -86,13 +86,13 @@ async def wfm() -> None:
             "\nSee the README for instructions: https://github.com/jb49088/wfm/blob/master/README.md\n"
         )
         ensure_app_dir()
-        cookies = prompt_for_cookies()
+        cookies = await prompt_for_cookies()
         print()
         ensure_cookies_file(cookies)
 
     if not COOKIES_FILE.exists():
         print("Cookies file not detected.\n")
-        cookies = prompt_for_cookies()
+        cookies = await prompt_for_cookies()
         print()
         ensure_cookies_file(cookies)
 
@@ -126,19 +126,14 @@ async def wfm() -> None:
                 break  # Success
 
             except aiohttp.ClientResponseError:
-                # Cancel the websocket task on auth failure
                 websocket_task.cancel()
-                try:
-                    await websocket_task
-                except asyncio.CancelledError:
-                    pass
 
                 if attempt == 3:
                     print("Too many failed attempts. Exiting.")
                     sys.exit()
 
                 print("Authentication failed.\n")
-                cookies = prompt_for_cookies()
+                cookies = await prompt_for_cookies()
                 print()
                 ensure_cookies_file(cookies)
 

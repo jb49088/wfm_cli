@@ -1,13 +1,19 @@
 import json
+import sys
+
+from prompt_toolkit.shortcuts import PromptSession
 
 from config import APP_DIR, COOKIES_FILE, USER_AGENT
 
 # ================================= COOKIE INPUT =================================
 
 
-def prompt_for_cookies() -> dict[str, str]:
+async def prompt_for_cookies() -> dict[str, str]:
     """Prompt for and return cookies."""
-    cookies = input("Cookies: ")
+    try:
+        cookies = await PromptSession().prompt_async("Cookies: ", is_password=True)
+    except (KeyboardInterrupt, EOFError):
+        sys.exit()
 
     cookies_dict = {
         cookie.strip().split("=", 1)[0]: cookie.strip().split("=", 1)[1]
