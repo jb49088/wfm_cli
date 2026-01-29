@@ -200,10 +200,25 @@ async def wfm() -> None:
                 )
 
             elif action == "seller":
+                if not args or not args[0].isdigit():
+                    print("\nUsage: seller <number>\n")
+                    continue
+                if not current_listings:
+                    print("\nNo listings available.\n")
+                    continue
+                seller_index = int(args[0]) - 1
+                if not (0 <= seller_index < len(current_listings)):
+                    print("\nSeller number out of range.\n")
+                    continue
+                if "id" in current_listings[seller_index]:
+                    print("\nCannot view your own listings with this command.\n")
+                    continue
+                if "reputation" not in current_listings[seller_index]:
+                    print("\nAlready viewing another seller's listings.\n")
+                    continue
+                seller_slug = current_listings[seller_index]["slug"]
+                seller_name = current_listings[seller_index]["seller"]
                 kwargs = parse_seller_args(args)
-                seller_num = int(args[0]) - 1
-                seller_slug = current_listings[seller_num]["slug"]
-                seller_name = current_listings[seller_num]["seller"]
                 current_listings = await seller(
                     id_to_name,
                     name_to_max_rank,
@@ -308,20 +323,17 @@ async def wfm() -> None:
                 print()
 
             elif action == "copy":
-                listing_index = int(args[0]) - 1
-                if not args:
-                    print("\nUsage: copy <number>\n")
-                    continue
-                if not args[0].isdigit():
+                if not args or not args[0].isdigit():
                     print("\nUsage: copy <number>\n")
                     continue
                 if not current_listings:
                     print("\nNo listings available.\n")
                     continue
+                listing_index = int(args[0]) - 1
                 if not (0 <= listing_index < len(current_listings)):
                     print("\nListing number out of range.\n")
                     continue
-                if "seller" not in current_listings[listing_index]:
+                if "id" in current_listings[listing_index]:
                     print("\nCannot copy your own listings.\n")
                     continue
                 listing_to_copy = current_listings[listing_index]
