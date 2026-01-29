@@ -432,7 +432,7 @@ async def _update_listings(
     headers: dict[str, str],
 ) -> None:
     """Decrement quantities or delete listings based on trade patterns in EE.log"""
-    print("\nSyncing listings...\n")
+    sync_occurred = False
     for trade in trades:
         candidates = []
         for listing in listings:
@@ -441,6 +441,8 @@ async def _update_listings(
 
         if not candidates:
             continue
+
+        sync_occurred = True
 
         plat_received = 0
         for received_item in trade["received"]:
@@ -456,6 +458,8 @@ async def _update_listings(
         )
 
         candidate["quantity"] -= item_count
+
+        print("\nSyncing listings...\n")
 
         if candidate["quantity"] <= 0:
             await delete_listing(session, candidate["id"], headers)
@@ -478,9 +482,10 @@ async def _update_listings(
                 f"{candidate['item']} listing quantity updated from {candidate['quantity'] + item_count} to {candidate['quantity']}."
             )
 
-        print()
-
         await asyncio.sleep(0.5)  # Rate limit
+
+    if not sync_occurred:
+        print("\nNo listings to sync.\n")
 
 
 async def sync(
@@ -492,11 +497,17 @@ async def sync(
     headers: dict[str, str],
 ):
     user_listings = await extract_user_listings(session, user, id_to_name, headers)
+    if not user_listings:
+        print("\nNo listings found.\n")
+        return
     log_path = _get_log_path()
     state = _load_sync_state()
     lines, offset = _get_log_lines(log_path, state)
     _save_sync_state(offset)
     trade_chunks = _extract_trade_chunks(lines)
+    if not trade_chunks:
+        print("\nNo recent trades found.\n")
+        return
     trades = _parse_trade_items(trade_chunks)
     await _update_listings(
         id_to_tags, id_to_bulkTradable, user_listings, trades, session, headers
