@@ -6,13 +6,16 @@ from config import APP_DIR, COOKIES_FILE, USER_AGENT
 
 
 def prompt_for_cookies() -> dict[str, str]:
-    """Prompt user for JWT token and CF clearance."""
-    cookies = {
-        "jwt": input("Enter your JWT token: "),
-        "cf": input("Enter your CF clearance: "),
+    """Prompt for and return cookies."""
+    cookies = input("Cookies: ")
+
+    cookies_dict = {
+        cookie.strip().split("=", 1)[0]: cookie.strip().split("=", 1)[1]
+        for cookie in cookies.split(";")
+        if "=" in cookie.strip()
     }
 
-    return cookies
+    return cookies_dict
 
 
 # =============================== FILE MANAGEMENT ================================
@@ -39,9 +42,7 @@ def load_cookies() -> dict[str, str]:
 
 
 def build_cookie_header(cookies: dict[str, str]) -> dict[str, str]:
-    return {
-        "Cookie": f"JWT={cookies['jwt']}; cf_clearance={cookies['cf']}",
-    }
+    return {"Cookie": "; ".join(f"{k}={v}" for k, v in cookies.items())}
 
 
 def build_authenticated_headers(cookie_header: dict[str, str]) -> dict[str, str]:
