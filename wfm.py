@@ -162,6 +162,9 @@ async def wfm() -> None:
             args = parts[1:]
 
             if action == "search":
+                if not args:
+                    print("\nUsage: search <item|number>\n")
+                    continue
                 if args[0].isdigit() and current_listings:
                     listing_index = int(args[0]) - 1
                     if 0 <= listing_index < len(current_listings):
@@ -169,12 +172,16 @@ async def wfm() -> None:
                         item_name = current_listings[listing_index]["item"]
                         item_slug = name_to_slug[item_name.lower()]
                     else:
-                        print(
-                            f"\nInvalid listing number. Valid range: 1-{len(current_listings)}\n"
-                        )
+                        print("\nListing number out of range.\n")
                         continue
                 else:
                     item, kwargs = parse_search_args(args)
+                    if item.isdigit() and not current_listings:
+                        print("\nNo active listings to reference.\n")
+                        continue
+                    if item.lower() not in name_to_slug:
+                        print(f"\nItem '{item}' not found.\n")
+                        continue
                     item_slug = name_to_slug[item.lower()]
 
                 current_listings = await search(
@@ -301,18 +308,23 @@ async def wfm() -> None:
                 print()
 
             elif action == "copy":
+                listing_index = int(args[0]) - 1
                 if not args:
                     print("\nUsage: copy <number>\n")
                     continue
+                if not args[0].isdigit():
+                    print("\nUsage: copy <number>\n")
+                    continue
                 if not current_listings:
-                    print("\nNo listings available. Use 'search <item>' first.\n")
+                    print("\nNo listings available.\n")
                     continue
-                if "seller" not in current_listings:
-                    print(
-                        "\nCannot copy your own listings. Use 'search <item>' to find other sellers.\n"
-                    )
+                if not (0 <= listing_index < len(current_listings)):
+                    print("\nListing number out of range.\n")
                     continue
-                listing_to_copy = current_listings[int(args[0]) - 1]
+                if "seller" not in current_listings[listing_index]:
+                    print("\nCannot copy your own listings.\n")
+                    continue
+                listing_to_copy = current_listings[listing_index]
                 copy(listing_to_copy, name_to_max_rank)
 
             elif action == "links":
