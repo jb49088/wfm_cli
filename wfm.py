@@ -2,12 +2,12 @@
 # =                                     WFM                                      =
 # ================================================================================
 
-# TODO: implement cookies checking
 # TODO: implement project-wide error handling
 
 import asyncio
 import json
 import shlex
+import sys
 from typing import Any
 
 import aiohttp
@@ -34,7 +34,7 @@ from auth import (
     prompt_for_cookies,
 )
 from commands import copy, links, listings, search, seller, sync
-from config import HISTORY_FILE
+from config import APP_DIR, HISTORY_FILE
 from display import DEFAULT_ORDERS, clear_screen, display_help, display_profile
 from filters import sort_listings
 from parsers import (
@@ -79,37 +79,68 @@ def build_name_to_slug_mapping(all_items: list[dict[str, Any]]) -> dict[str, str
 
 async def wfm() -> None:
     """Main entry point and top-level orchestration function for wfm."""
-    ensure_app_dir()
+    if not APP_DIR.exists():
+        print(
+            "Welcome to wfm.\n"
+            "\nTo get started, enter your browser cookies.\n"
+            "\nSee the README for instructions: https://github.com/jb49088/wfm/blob/master/README.md\n"
+        )
+        ensure_app_dir()
+        cookies = prompt_for_cookies()
+        print()
+        ensure_cookies_file(cookies)
 
     if not COOKIES_FILE.exists():
+        print("Cookies file not detected.\n")
         cookies = prompt_for_cookies()
+        print()
         ensure_cookies_file(cookies)
 
     cookies = load_cookies()
-    cookie_header = build_cookie_header(cookies)
-    authenticated_headers = build_authenticated_headers(cookie_header)
 
     async with aiohttp.ClientSession() as session:
-        initial_status_event = asyncio.Event()
-        status_queue = asyncio.Queue()
+        for attempt in range(4):
+            cookie_header = build_cookie_header(cookies)
+            authenticated_headers = build_authenticated_headers(cookie_header)
 
-        status_state = {"status": "invisible"}
+            initial_status_event = asyncio.Event()
+            status_queue = asyncio.Queue()
+            status_state = {"status": "invisible"}
 
-        websocket_task = asyncio.create_task(
-            open_websocket(
-                cookie_header,
-                status_state,
-                initial_status_event,
-                status_queue,
+            websocket_task = asyncio.create_task(
+                open_websocket(
+                    cookie_header,
+                    status_state,
+                    initial_status_event,
+                    status_queue,
+                )
             )
-        )
 
-        user_info, all_items = await asyncio.gather(
-            get_user_info(session, authenticated_headers),
-            get_all_items(session),
-        )
+            try:
+                user_info, all_items = await asyncio.gather(
+                    get_user_info(session, authenticated_headers),
+                    get_all_items(session),
+                )
 
-        await initial_status_event.wait()
+                await initial_status_event.wait()
+                break  # Success
+
+            except aiohttp.ClientResponseError:
+                # Cancel the websocket task on auth failure
+                websocket_task.cancel()
+                try:
+                    await websocket_task
+                except asyncio.CancelledError:
+                    pass
+
+                if attempt == 3:
+                    print("Too many failed attempts. Exiting.")
+                    sys.exit()
+
+                print("Authentication failed.\n")
+                cookies = prompt_for_cookies()
+                print()
+                ensure_cookies_file(cookies)
 
         id_to_name = build_id_to_name_mapping(all_items)
         id_to_tags = build_id_to_tags_mapping(all_items)
