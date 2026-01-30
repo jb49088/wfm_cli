@@ -142,11 +142,10 @@ async def listings(
     rank: int | None = None,
     sort: str = "updated",
     order: str | None = None,
-) -> list[dict[str, Any]]:
+) -> tuple[bool, str | None, list[dict[str, Any]]]:
     user_listings = await extract_user_listings(session, user, id_to_name, headers)
     if not user_listings:
-        print("\nNo listings found.\n")
-        return []
+        return (False, "No listings found.", [])
     filtered_item_listings = filter_listings(user_listings, rank, status="all")
     sorted_user_listings, sort_order = sort_listings(
         filtered_item_listings, sort, order, {**DEFAULT_ORDERS, "price": "desc"}
@@ -155,7 +154,7 @@ async def listings(
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, sort_order)
 
-    return sorted_user_listings
+    return (True, None, sorted_user_listings)
 
 
 # ==================================== SELLER ====================================

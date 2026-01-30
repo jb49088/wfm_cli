@@ -196,7 +196,7 @@ async def wfm() -> None:
 
             elif action == "listings":
                 kwargs = parse_listings_args(args)
-                current_listings = await listings(
+                success, message, current_listings = await listings(
                     id_to_name,
                     id_to_max_rank,
                     user_info["slug"],
@@ -204,6 +204,9 @@ async def wfm() -> None:
                     session,
                     **kwargs,
                 )
+
+                if not success:
+                    print(f"\n{message}\n")
 
             elif action == "seller":
                 if not args or not args[0].isdigit():
