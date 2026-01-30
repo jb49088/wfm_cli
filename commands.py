@@ -497,20 +497,20 @@ async def sync(
     user: str,
     session: aiohttp.ClientSession,
     headers: dict[str, str],
-):
+) -> tuple[bool, str | None]:
     user_listings = await extract_user_listings(session, user, id_to_name, headers)
     if not user_listings:
-        print("\nNo listings found.\n")
-        return
+        return (False, "No listings found.")
     log_path = _get_log_path()
     state = _load_sync_state()
     lines, offset = _get_log_lines(log_path, state)
     _save_sync_state(offset)
     trade_chunks = _extract_trade_chunks(lines)
     if not trade_chunks:
-        print("\nNo recent trades found.\n")
-        return
+        return (False, "No recent trades found.")
     trades = _parse_trade_items(trade_chunks)
     await _update_listings(
         id_to_tags, id_to_bulkTradable, user_listings, trades, session, headers
     )
+
+    return (True, None)

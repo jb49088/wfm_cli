@@ -384,7 +384,7 @@ async def wfm() -> None:
                 await status_response_event.wait()
 
             elif action == "sync":
-                await sync(
+                success, message = await sync(
                     id_to_name,
                     id_to_tags,
                     id_to_bulkTradable,
@@ -392,6 +392,9 @@ async def wfm() -> None:
                     session,
                     authenticated_headers,
                 )
+
+                if not success:
+                    print(f"\n{message}\n")
 
             elif action == "profile":
                 user_info = await get_user_info(session, authenticated_headers)
