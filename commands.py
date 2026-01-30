@@ -283,12 +283,11 @@ async def links(
     prompt_session: PromptSession,
     sort: str = "item",
     order: str | None = None,
-) -> None:
+) -> tuple[bool, str | None]:
     """Main entry point."""
     user_listings = await extract_user_listings(session, user, id_to_name, headers)
     if not user_listings:
-        print("\nNo listings found.\n")
-        return
+        return (False, "No listings found.")
     sorted_user_listings, _ = sort_listings(user_listings, sort, order, DEFAULT_ORDERS)
     expanded_items = _expand_item_sets(sorted_user_listings, all_items)
     filtered_items = _filter_unlinkable_items(expanded_items)
@@ -296,6 +295,8 @@ async def links(
     link_chunks = _chunk_links(links)
     _print_prep_status(len(expanded_items), len(expanded_items) - len(filtered_items))
     await _copy_to_clipboard(link_chunks, prompt_session)
+
+    return (True, None)
 
 
 # ===================================== SYNC =====================================

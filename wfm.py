@@ -355,7 +355,7 @@ async def wfm() -> None:
                 copy(listing_to_copy, id_to_max_rank)
 
             elif action == "links":
-                await links(
+                success, message = await links(
                     all_items,
                     id_to_name,
                     user_info["slug"],
@@ -363,6 +363,9 @@ async def wfm() -> None:
                     session,
                     prompt_session,
                 )
+
+                if not success:
+                    print(f"\n{message}\n")
 
             elif action == "status":
                 if not args:
