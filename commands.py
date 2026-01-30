@@ -85,7 +85,7 @@ UNICODE_RANK_PATTERN = re.compile(r"[\uE000-\uF8FF]")
 # ===================================== COPY =====================================
 
 
-def copy(listing_to_copy: dict[str, Any], max_ranks: dict[str, int | None]) -> None:
+def copy(listing_to_copy: dict[str, Any], max_ranks: dict[str, int | None]) -> str:
     """Copy a listing for in-game whispering."""
     item_id = listing_to_copy["itemId"]
     item_name = listing_to_copy["item"]
@@ -102,7 +102,7 @@ def copy(listing_to_copy: dict[str, Any], max_ranks: dict[str, int | None]) -> N
 
     pyperclip.copy(message)
 
-    print(f"\nCopied to clipboard: {message}\n")
+    return message
 
 
 # ==================================== SEARCH ====================================

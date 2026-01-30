@@ -342,7 +342,7 @@ async def wfm() -> None:
                     print("\nUsage: copy <number>\n")
                     continue
                 if not current_listings:
-                    print("\nNo listings available.\n")
+                    print("\nNo listings to copy.\n")
                     continue
                 listing_index = int(args[0]) - 1
                 if not (0 <= listing_index < len(current_listings)):
@@ -352,7 +352,8 @@ async def wfm() -> None:
                     print("\nCannot copy your own listings.\n")
                     continue
                 listing_to_copy = current_listings[listing_index]
-                copy(listing_to_copy, id_to_max_rank)
+                message = copy(listing_to_copy, id_to_max_rank)
+                print(f"\nCopied to clipboard: {message}\n")
 
             elif action == "links":
                 success, message = await links(
