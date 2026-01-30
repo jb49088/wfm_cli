@@ -144,7 +144,7 @@ async def add_listing(
     price: int,
     quantity: int,
     rank=None,
-) -> None:
+) -> tuple[bool, str | None]:
     payload = {
         "itemId": item_id,
         "platinum": price,
@@ -160,16 +160,16 @@ async def add_listing(
 
     if rank is not None:
         if max_rank is None:
-            print(f"\n{item_name} does not have ranks.\n")
-            return
+            return (False, f"{item_name} does not have ranks.")
         if rank < 0 or rank > max_rank:
-            print(f"\nInvalid rank for {item_name}. Valid range: 0-{max_rank}\n")
-            return
+            return (False, f"Invalid rank for '{item_name}'. Valid range: 0-{max_rank}")
         payload["rank"] = rank
 
     if rank is None and max_rank is not None:
-        print(f"\nYou must enter a rank for {item_name}. Valid range: 0-{max_rank}\n")
-        return
+        return (
+            False,
+            f"You must enter a rank for '{item_name}'. Valid range: 0-{max_rank}",
+        )
 
     if "arcane_enhancement" in item_tags and is_bulk_tradeable:
         payload["perTrade"] = 1
@@ -179,7 +179,7 @@ async def add_listing(
     ) as r:
         r.raise_for_status()
 
-    print("\nListing added.\n")
+    return (True, None)
 
 
 async def change_visibility(

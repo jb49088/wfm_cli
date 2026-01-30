@@ -244,7 +244,7 @@ async def wfm() -> None:
                     print(f"\nItem '{args[0]}' is not a valid item.\n")
                     continue
                 kwargs = parse_add_args(args, name_to_id)
-                await add_listing(
+                success, message = await add_listing(
                     session,
                     authenticated_headers,
                     id_to_max_rank,
@@ -253,6 +253,11 @@ async def wfm() -> None:
                     id_to_bulkTradable,
                     **kwargs,
                 )
+
+                if success:
+                    print("\nListing added.\n")
+                else:
+                    print(f"\n{message}\n")
 
             elif action == "show":
                 if args[0] == "all":
