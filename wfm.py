@@ -166,24 +166,23 @@ async def wfm() -> None:
 
             if action == "search":
                 if not args:
-                    print(
-                        "\nUsage: search <item|number> [sort <field>] [order <asc|desc>] [rank <number>] [status <all|ingame|online|offline>]\n"
-                    )
+                    print("\nNo item specified.\n")
                     continue
-                if args[0].isdigit() and current_listings:
-                    listing_index = int(args[0]) - 1
-                    if 0 <= listing_index < len(current_listings):
-                        _, kwargs = parse_search_args(args)
-                        item_id = current_listings[listing_index]["itemId"]
-                        item_slug = id_to_slug[item_id]
+                if args[0].isdigit():
+                    if current_listings:
+                        listing_index = int(args[0]) - 1
+                        if 0 <= listing_index < len(current_listings):
+                            _, kwargs = parse_search_args(args)
+                            item_id = current_listings[listing_index]["itemId"]
+                            item_slug = id_to_slug[item_id]
+                        else:
+                            print("\nInvalid listing number.\n")
+                            continue
                     else:
-                        print("\nListing number out of range.\n")
+                        print("\nNo listings available.\n")
                         continue
                 else:
                     item, kwargs = parse_search_args(args)
-                    if item.isdigit() and not current_listings:
-                        print("\nNo active listings to reference.\n")
-                        continue
                     if item.lower() not in name_to_id:
                         print(f"\nItem '{item}' not found.\n")
                         continue
@@ -210,20 +209,20 @@ async def wfm() -> None:
 
             elif action == "seller":
                 if not args or not args[0].isdigit():
-                    print("\nUsage: seller <number>\n")
+                    print("\nNo listing specified.\n")
                     continue
                 if not current_listings:
                     print("\nNo listings available.\n")
                     continue
                 seller_index = int(args[0]) - 1
                 if not (0 <= seller_index < len(current_listings)):
-                    print("\nSeller number out of range.\n")
+                    print("\nInvalid listing number.\n")
                     continue
                 if "id" in current_listings[seller_index]:
-                    print("\nCannot view your own listings with this command.\n")
+                    print("\nCannot view own listings with this command.\n")
                     continue
                 if "reputation" not in current_listings[seller_index]:
-                    print("\nAlready viewing another seller's listings.\n")
+                    print("\nAlready viewing a seller.\n")
                     continue
                 seller_slug = current_listings[seller_index]["slug"]
                 seller_name = current_listings[seller_index]["seller"]
@@ -254,36 +253,43 @@ async def wfm() -> None:
                 )
 
                 if success:
-                    print("\nListing added.\n")
+                    item_name = id_to_name[kwargs["item_id"]]
+                    print(f"\n{item_name} listing added.\n")
                 else:
                     print(f"\n{message}\n")
 
             elif action == "show":
                 if args[0] == "all":
                     await change_all_visibility(session, True, authenticated_headers)
-                    print("\nAll listings are now visible.\n")
+                    print("\nAll listings visible.\n")
                 else:
-                    listing_id = current_listings[int(args[0]) - 1]["id"]
+                    listing = current_listings[int(args[0]) - 1]
+                    listing_id = listing["id"]
+                    item = listing["item"]
                     await change_visibility(
                         session, listing_id, True, authenticated_headers
                     )
-                    print(f"\nListing {args[0]} is now visible.\n")
+                    print(f"\n{item} listing visible.\n")
 
             elif action == "hide":
                 if args[0] == "all":
                     await change_all_visibility(session, False, authenticated_headers)
-                    print("\nAll listings are now hidden.\n")
+                    print("\nAll listings hidden.\n")
                 else:
-                    listing_id = current_listings[int(args[0]) - 1]["id"]
+                    listing = current_listings[int(args[0]) - 1]
+                    listing_id = listing["id"]
+                    item = listing["item"]
                     await change_visibility(
                         session, listing_id, False, authenticated_headers
                     )
-                    print(f"\nListing {args[0]} is now hidden.\n")
+                    print(f"\n{args[0]} listing hidden.\n")
 
             elif action == "delete":
-                listing_id = current_listings[int(args[0]) - 1]["id"]
+                listing = current_listings[int(args[0]) - 1]
+                listing_id = listing["id"]
+                item = listing["item"]
                 await delete_listing(session, listing_id, authenticated_headers)
-                print(f"\nDeleted listing {args[0]}.\n")
+                print(f"\nDeleted {item} listing.\n")
 
             elif action == "edit":
                 listing = current_listings[int(args[0]) - 1]
@@ -297,7 +303,7 @@ async def wfm() -> None:
                     id_to_bulkTradable,
                     **kwargs,
                 )
-                print(f"\nListing {args[0]} updated.\n")
+                print(f"\nUpdated {listing['item']} listing.\n")
 
             elif action == "bump":
                 if args[0] == "all":
@@ -337,23 +343,23 @@ async def wfm() -> None:
                         listing["rank"],
                         listing["visible"],
                     )
-                    print(f"\nBumped listing {args[0]}.")
+                    print(f"\nBumped {listing['item']} listing.")
 
                 print()
 
             elif action == "copy":
                 if not args or not args[0].isdigit():
-                    print("\nUsage: copy <number>\n")
+                    print("\nNo listing specified.\n")
                     continue
                 if not current_listings:
-                    print("\nNo listings to copy.\n")
+                    print("\nNo listings available.\n")
                     continue
                 listing_index = int(args[0]) - 1
                 if not (0 <= listing_index < len(current_listings)):
-                    print("\nListing number out of range.\n")
+                    print("\nInvalid listing number.\n")
                     continue
                 if "id" in current_listings[listing_index]:
-                    print("\nCannot copy your own listings.\n")
+                    print("\nCannot copy own listings.\n")
                     continue
                 listing_to_copy = current_listings[listing_index]
                 message = copy(listing_to_copy, id_to_max_rank)
@@ -374,13 +380,11 @@ async def wfm() -> None:
 
             elif action == "status":
                 if not args:
-                    print(f"\nUsage: status <{'|'.join(STATUS_MAPPING)}>\n")
+                    print("\nNo status specified.\n")
                     continue
 
                 if args[0] not in STATUS_MAPPING:
-                    print(
-                        f"\nInvalid status '{args[0]}'. Valid options: {', '.join(STATUS_MAPPING)}\n"
-                    )
+                    print(f"\n'{args[0]}' is not a valid status.\n")
                     continue
 
                 message = {
@@ -418,9 +422,7 @@ async def wfm() -> None:
                 break
 
             else:
-                print(
-                    f"\nUnknown command: '{' '.join(parts)}'. Use 'help' to see available commands.\n"
-                )
+                print(f"\n'{action}' is not a valid command. See 'help'.\n")
 
 
 if __name__ == "__main__":
