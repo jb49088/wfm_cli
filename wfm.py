@@ -285,17 +285,32 @@ async def wfm() -> None:
                 print(f"\n{item_name} listing added.\n")
 
             elif action == "show":
+                if not args:
+                    print("\nNo listing specified.\n")
+                    continue
+                if not current_listings:
+                    print("\nNo listings available.\n")
+                    continue
                 if args[0] == "all":
                     await change_all_visibility(session, True, authenticated_headers)
                     print("\nAll listings visible.\n")
+                elif args[0].isdigit():
+                    listing_index = int(args[0]) - 1
+                    if 0 <= listing_index < len(current_listings):
+                        listing = current_listings[listing_index]
+                        listing_id = listing["id"]
+                        item = listing["item"]
+                        await change_visibility(
+                            session, listing_id, True, authenticated_headers
+                        )
+                        print(f"\n{item} listing visible.\n")
+
+                    else:
+                        print("\nInvalid listing number.\n")
+                        continue
                 else:
-                    listing = current_listings[int(args[0]) - 1]
-                    listing_id = listing["id"]
-                    item = listing["item"]
-                    await change_visibility(
-                        session, listing_id, True, authenticated_headers
-                    )
-                    print(f"\n{item} listing visible.\n")
+                    print("\nInvalid listing specifier.\n")
+                    continue
 
             elif action == "hide":
                 if args[0] == "all":

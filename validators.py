@@ -43,6 +43,53 @@ def validate_listings_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
     return (True, None)
 
 
+# ==================================== SELLER ====================================
+
+
+def validate_seller_listing_selection(
+    args: list[str], current_listings: list[dict[str, Any]]
+) -> tuple[bool, str | None, dict[str, Any] | None]:
+    if not args or not args[0].isdigit():
+        return (False, "No listing specified.", None)
+
+    if not current_listings:
+        return (False, "No listings available.", None)
+
+    index = int(args[0]) - 1
+
+    if not (0 <= index < len(current_listings)):
+        return (False, "Invalid listing number.", None)
+
+    listing = current_listings[index]
+
+    if "id" in current_listings[index]:
+        return (False, "Cannot view own listings with this command.", None)
+
+    if "reputation" not in current_listings[index]:
+        return (False, "Already viewing a seller.", None)
+
+    return (True, None, listing)
+
+
+def validate_seller_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
+    valid_sorts = ["item", "price", "rank", "quantity", "updated"]
+    valid_orders = ["asc", "desc"]
+
+    if "rank" in kwargs:
+        try:
+            kwargs["rank"] = int(kwargs["rank"])
+        except ValueError:
+            return (False, "Rank must be a number.")
+
+    if "sort" in kwargs and kwargs["sort"] not in valid_sorts:
+        return (False, "Invalid sort.")
+
+    if "order" in kwargs and kwargs["order"] not in valid_orders:
+        return (False, "Invalid order.")
+
+    return (True, None)
+
+
 # ===================================== ADD ======================================
 
 
@@ -94,52 +141,5 @@ def validate_add_args(
             return (False, f"No ranks for{item_name}.")
         if rank < 0 or rank > max_rank:
             return (False, f"Invalid rank (0-{max_rank}).")
-
-    return (True, None)
-
-
-# ==================================== SELLER ====================================
-
-
-def validate_seller_listing_selection(
-    args: list[str], current_listings: list[dict[str, Any]]
-) -> tuple[bool, str | None, dict[str, Any] | None]:
-    if not args or not args[0].isdigit():
-        return (False, "No listing specified.", None)
-
-    if not current_listings:
-        return (False, "No listings available.", None)
-
-    index = int(args[0]) - 1
-
-    if not (0 <= index < len(current_listings)):
-        return (False, "Invalid listing number.", None)
-
-    listing = current_listings[index]
-
-    if "id" in current_listings[index]:
-        return (False, "Cannot view own listings with this command.", None)
-
-    if "reputation" not in current_listings[index]:
-        return (False, "Already viewing a seller.", None)
-
-    return (True, None, listing)
-
-
-def validate_seller_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
-    valid_sorts = ["item", "price", "rank", "quantity", "updated"]
-    valid_orders = ["asc", "desc"]
-
-    if "rank" in kwargs:
-        try:
-            kwargs["rank"] = int(kwargs["rank"])
-        except ValueError:
-            return (False, "Rank must be a number.")
-
-    if "sort" in kwargs and kwargs["sort"] not in valid_sorts:
-        return (False, "Invalid sort.")
-
-    if "order" in kwargs and kwargs["order"] not in valid_orders:
-        return (False, "Invalid order.")
 
     return (True, None)
