@@ -44,7 +44,7 @@ from parsers import (
     parse_search_args,
     parse_seller_args,
 )
-from validators import validate_add_args
+from validators import validate_add_args, validate_seller_listing_selection
 from websocket import open_websocket
 
 STATUS_MAPPING = {
@@ -209,25 +209,21 @@ async def wfm() -> None:
                     print(f"\n{message}\n")
 
             elif action == "seller":
-                if not args or not args[0].isdigit():
-                    print("\nNo listing specified.\n")
+                success, message, listing = validate_seller_listing_selection(
+                    args, current_listings
+                )
+
+                if not success:
+                    print(f"\n{message}\n")
                     continue
-                if not current_listings:
-                    print("\nNo listings available.\n")
-                    continue
-                seller_index = int(args[0]) - 1
-                if not (0 <= seller_index < len(current_listings)):
-                    print("\nInvalid listing number.\n")
-                    continue
-                if "id" in current_listings[seller_index]:
-                    print("\nCannot view own listings with this command.\n")
-                    continue
-                if "reputation" not in current_listings[seller_index]:
-                    print("\nAlready viewing a seller.\n")
-                    continue
-                seller_slug = current_listings[seller_index]["slug"]
-                seller_name = current_listings[seller_index]["seller"]
+
+                assert listing is not None
+
                 kwargs = parse_seller_args(args)
+
+                seller_slug = listing["slug"]
+                seller_name = listing["seller"]
+
                 current_listings = await seller(
                     id_to_name,
                     id_to_max_rank,
@@ -239,6 +235,7 @@ async def wfm() -> None:
 
             elif action == "add":
                 kwargs = parse_add_args(args)
+
                 success, message = validate_add_args(
                     kwargs,
                     name_to_id,
@@ -247,6 +244,7 @@ async def wfm() -> None:
                     id_to_tags,
                     id_to_bulkTradable,
                 )
+
                 if not success:
                     print(f"\n{message}\n")
                     continue

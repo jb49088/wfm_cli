@@ -51,3 +51,28 @@ def validate_add_args(
             return (False, f"Invalid rank (0-{max_rank}).")
 
     return (True, None)
+
+
+def validate_seller_listing_selection(
+    args: list[str], current_listings: list[dict[str, Any]]
+) -> tuple[bool, str | None, dict[str, Any] | None]:
+    if not args or not args[0].isdigit():
+        return (False, "No listing specified.", None)
+
+    if not current_listings:
+        return (False, "No listings available.", None)
+
+    index = int(args[0]) - 1
+
+    if not (0 <= index < len(current_listings)):
+        return (False, "Invalid listing number.", None)
+
+    listing = current_listings[index]
+
+    if "id" in current_listings[index]:
+        return (False, "Cannot view own listings with this command.", None)
+
+    if "reputation" not in current_listings[index]:
+        return (False, "Already viewing a seller.", None)
+
+    return (True, None, listing)
