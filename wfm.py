@@ -196,7 +196,8 @@ async def wfm() -> None:
 
             elif action == "listings":
                 kwargs = parse_listings_args(args)
-                success, message, current_listings = await listings(
+
+                success, error, current_listings = await listings(
                     id_to_name,
                     id_to_max_rank,
                     user_info["slug"],
@@ -206,15 +207,15 @@ async def wfm() -> None:
                 )
 
                 if not success:
-                    print(f"\n{message}\n")
+                    print(f"\n{error}\n")
 
             elif action == "seller":
-                success, message, listing = validate_seller_listing_selection(
+                success, error, listing = validate_seller_listing_selection(
                     args, current_listings
                 )
 
                 if not success:
-                    print(f"\n{message}\n")
+                    print(f"\n{error}\n")
                     continue
 
                 assert listing is not None
@@ -236,7 +237,7 @@ async def wfm() -> None:
             elif action == "add":
                 kwargs = parse_add_args(args)
 
-                success, message = validate_add_args(
+                success, error = validate_add_args(
                     kwargs,
                     name_to_id,
                     id_to_name,
@@ -246,7 +247,7 @@ async def wfm() -> None:
                 )
 
                 if not success:
-                    print(f"\n{message}\n")
+                    print(f"\n{error}\n")
                     continue
 
                 await add_listing(session, authenticated_headers, **kwargs)
@@ -358,11 +359,11 @@ async def wfm() -> None:
                     print("\nCannot copy own listings.\n")
                     continue
                 listing_to_copy = current_listings[listing_index]
-                message = copy(listing_to_copy, id_to_max_rank)
-                print(f"\nCopied to clipboard: {message}\n")
+                error = copy(listing_to_copy, id_to_max_rank)
+                print(f"\nCopied to clipboard: {error}\n")
 
             elif action == "links":
-                success, message = await links(
+                success, error = await links(
                     all_items,
                     id_to_name,
                     user_info["slug"],
@@ -372,7 +373,7 @@ async def wfm() -> None:
                 )
 
                 if not success:
-                    print(f"\n{message}\n")
+                    print(f"\n{error}\n")
 
             elif action == "status":
                 if not args:
@@ -383,16 +384,16 @@ async def wfm() -> None:
                     print(f"\n'{args[0]}' is not a valid status.\n")
                     continue
 
-                message = {
+                error = {
                     "route": "@wfm|cmd/status/set",
                     "payload": {"status": args[0], "duration": None},
                 }
                 status_response_event = asyncio.Event()
-                await status_queue.put((json.dumps(message), status_response_event))
+                await status_queue.put((json.dumps(error), status_response_event))
                 await status_response_event.wait()
 
             elif action == "sync":
-                success, message = await sync(
+                success, error = await sync(
                     id_to_name,
                     id_to_tags,
                     id_to_bulkTradable,
@@ -402,7 +403,7 @@ async def wfm() -> None:
                 )
 
                 if not success:
-                    print(f"\n{message}\n")
+                    print(f"\n{error}\n")
 
             elif action == "profile":
                 user_info = await get_user_info(session, authenticated_headers)
