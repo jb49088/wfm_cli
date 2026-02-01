@@ -3,6 +3,7 @@
 # ================================================================================
 
 # TODO: implement project-wide error handling
+# TODO: make current listings only get filled if showed listings
 
 import asyncio
 import json
@@ -44,7 +45,11 @@ from parsers import (
     parse_search_args,
     parse_seller_args,
 )
-from validators import validate_add_args, validate_seller_listing_selection
+from validators import (
+    validate_add_args,
+    validate_seller_args,
+    validate_seller_listing_selection,
+)
 from websocket import open_websocket
 
 STATUS_MAPPING = {
@@ -213,19 +218,22 @@ async def wfm() -> None:
                 success, error, listing = validate_seller_listing_selection(
                     args, current_listings
                 )
-
                 if not success:
                     print(f"\n{error}\n")
                     continue
-
                 assert listing is not None
 
                 kwargs = parse_seller_args(args)
 
+                success, error = validate_seller_args(kwargs)
+                if not success:
+                    print(f"\n{error}\n")
+                    continue
+
                 seller_slug = listing["slug"]
                 seller_name = listing["seller"]
 
-                current_listings = await seller(
+                success, error, current_listings = await seller(
                     id_to_name,
                     id_to_max_rank,
                     seller_slug,
@@ -233,6 +241,10 @@ async def wfm() -> None:
                     session,
                     **kwargs,
                 )
+
+                if not success:
+                    print(f"\n{error}\n")
+                    continue
 
             elif action == "add":
                 kwargs = parse_add_args(args)

@@ -169,9 +169,13 @@ async def seller(
     rank: int | None = None,
     sort: str = "updated",
     order: str | None = None,
-) -> list[dict[str, Any]]:
+) -> tuple[bool, str | None, list[dict[str, Any]]]:
     seller_listings = await extract_seller_listings(session, slug, seller, id_to_name)
+    if not seller_listings:
+        return (False, "No listings available.", [])
     filtered_seller_listings = filter_listings(seller_listings, rank, status="all")
+    if not filtered_seller_listings:
+        return (False, "No listings match the filters.", [])
     sorted_seller_listings, sort_order = sort_listings(
         filtered_seller_listings, sort, order, DEFAULT_ORDERS
     )
@@ -179,7 +183,7 @@ async def seller(
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, sort_order)
 
-    return sorted_seller_listings
+    return (True, None, sorted_seller_listings)
 
 
 # ==================================== LINKS =====================================

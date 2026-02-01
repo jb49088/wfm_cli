@@ -44,6 +44,7 @@ def parse_listings_args(args: list[str]) -> dict[str, Any]:
 def parse_add_args(args: list[str]) -> dict[str, Any]:
     kwargs: dict[str, Any] = {"item_name": args[0]}
     pairs = zip(args[1::2], args[2::2])
+
     for key, value in pairs:
         kwargs[key] = int(value)
 
@@ -51,19 +52,11 @@ def parse_add_args(args: list[str]) -> dict[str, Any]:
 
 
 def parse_seller_args(args: list[str]) -> dict[str, Any]:
-    kwargs = {
-        "sort": "updated",
-        "order": None,
-        "rank": None,
-    }
-
+    kwargs = {}
     pairs = zip(args[1::2], args[2::2])
 
     for key, value in pairs:
         kwargs[key] = value
-
-    if kwargs["rank"]:
-        kwargs["rank"] = int(kwargs["rank"])
 
     return kwargs
 

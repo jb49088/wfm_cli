@@ -76,3 +76,22 @@ def validate_seller_listing_selection(
         return (False, "Already viewing a seller.", None)
 
     return (True, None, listing)
+
+
+def validate_seller_args(kwargs: dict[str, Any]):
+    valid_sorts = ["item", "price", "quantity", "updated", "rank"]
+    valid_orders = ["asc", "desc"]
+
+    if "rank" in kwargs:
+        try:
+            kwargs["rank"] = int(kwargs["rank"])
+        except ValueError:
+            return (False, "Rank must be a number.")
+
+    if "sort" in kwargs and kwargs["sort"] not in valid_sorts:
+        return (False, "Invalid sort.")
+
+    if "order" in kwargs and kwargs["order"] not in valid_orders:
+        return (False, "Invalid order.")
+
+    return (True, None)
