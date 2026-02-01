@@ -19,19 +19,11 @@ def parse_search_args(args: list[str]) -> tuple[str, dict[str, Any]]:
 
 
 def parse_listings_args(args: list[str]) -> dict[str, Any]:
-    kwargs = {
-        "sort": "updated",
-        "order": None,
-        "rank": None,
-    }
-
+    kwargs = {}
     pairs = zip(args[::2], args[1::2])
 
     for key, value in pairs:
         kwargs[key] = value
-
-    if kwargs["rank"]:
-        kwargs["rank"] = int(kwargs["rank"])
 
     return kwargs
 

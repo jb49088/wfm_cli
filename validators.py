@@ -3,7 +3,7 @@ from typing import Any
 # ==================================== SEARCH ====================================
 
 
-def validate_search_args(kwargs: dict[str, Any]):
+def validate_search_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
     valid_sorts = [
         "seller",
         "reputation",
@@ -26,6 +26,19 @@ def validate_search_args(kwargs: dict[str, Any]):
 
     if "order" in kwargs and kwargs["order"] not in valid_orders:
         return (False, "Invalid order.")
+
+    return (True, None)
+
+
+# =================================== LISTINGS ===================================
+
+
+def validate_listings_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
+    if "rank" in kwargs:
+        try:
+            kwargs["rank"] = int(kwargs["rank"])
+        except ValueError:
+            return (False, "Rank must be a number.")
 
     return (True, None)
 

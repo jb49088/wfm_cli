@@ -4,6 +4,7 @@
 
 # TODO: implement project-wide error handling
 # TODO: make current listings only get filled if showed listings
+# TODO: switch to result objects
 
 import asyncio
 import json
@@ -47,6 +48,7 @@ from parsers import (
 )
 from validators import (
     validate_add_args,
+    validate_listings_args,
     validate_search_args,
     validate_seller_args,
     validate_seller_listing_selection,
@@ -211,6 +213,11 @@ async def wfm() -> None:
             elif action == "listings":
                 kwargs = parse_listings_args(args)
 
+                success, error = validate_listings_args(kwargs)
+                if not success:
+                    print(f"\n{error}\n")
+                    continue
+
                 success, error, current_listings = await listings(
                     id_to_name,
                     id_to_max_rank,
@@ -222,6 +229,7 @@ async def wfm() -> None:
 
                 if not success:
                     print(f"\n{error}\n")
+                    continue
 
             elif action == "seller":
                 success, error, listing = validate_seller_listing_selection(
