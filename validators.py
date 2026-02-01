@@ -1,5 +1,35 @@
 from typing import Any
 
+# ==================================== SEARCH ====================================
+
+
+def validate_search_args(kwargs: dict[str, Any]):
+    valid_sorts = [
+        "seller",
+        "reputation",
+        "status",
+        "item",
+        "price",
+        "rank",
+        "quantity",
+        "updated",
+    ]
+    valid_orders = ["asc", "desc"]
+    if "rank" in kwargs:
+        try:
+            kwargs["rank"] = int(kwargs["rank"])
+        except ValueError:
+            return (False, "Rank must be a number.")
+
+    if "sort" in kwargs and kwargs["sort"] not in valid_sorts:
+        return (False, "Invalid sort.")
+
+    if "order" in kwargs and kwargs["order"] not in valid_orders:
+        return (False, "Invalid order.")
+
+    return (True, None)
+
+
 # ===================================== ADD ======================================
 
 
@@ -83,8 +113,8 @@ def validate_seller_listing_selection(
     return (True, None, listing)
 
 
-def validate_seller_args(kwargs: dict[str, Any]):
-    valid_sorts = ["item", "price", "quantity", "updated", "rank"]
+def validate_seller_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
+    valid_sorts = ["item", "price", "rank", "quantity", "updated"]
     valid_orders = ["asc", "desc"]
 
     if "rank" in kwargs:

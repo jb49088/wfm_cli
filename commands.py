@@ -117,9 +117,13 @@ async def search(
     sort: str = "price",
     order: str | None = None,
     status: str = "ingame",
-) -> list[dict[str, Any]]:
+) -> tuple[bool, str | None, list[dict[str, Any]]]:
     item_listings = await extract_item_listings(session, item_slug, id_to_name)
+    if not item_listings:
+        return (False, "No listings available.", [])
     filtered_item_listings = filter_listings(item_listings, rank, status)
+    if not filtered_item_listings:
+        return (False, "No listings match specified filters.", [])
     sorted_item_listings, sort_order = sort_listings(
         filtered_item_listings, sort, order, DEFAULT_ORDERS
     )
@@ -127,7 +131,7 @@ async def search(
     column_widths = determine_widths(data_rows, sort)
     display_listings(data_rows, column_widths, RIGHT_ALLIGNED_COLUMNS, sort, sort_order)
 
-    return sorted_item_listings
+    return (True, None, sorted_item_listings)
 
 
 # =================================== LISTINGS ===================================

@@ -1,26 +1,21 @@
 from typing import Any
 
+# ==================================== SEARCH ====================================
+
 
 def parse_search_args(args: list[str]) -> tuple[str, dict[str, Any]]:
+    kwargs = {}
     item = args[0]
-
-    kwargs = {
-        "sort": "price",
-        "order": None,
-        "rank": None,
-        "status": "ingame",
-    }
-
     rest = args[1:]
     pairs = zip(rest[::2], rest[1::2])
 
     for key, value in pairs:
         kwargs[key] = value
 
-    if kwargs["rank"]:
-        kwargs["rank"] = int(kwargs["rank"])
-
     return item, kwargs
+
+
+# =================================== LISTINGS ===================================
 
 
 def parse_listings_args(args: list[str]) -> dict[str, Any]:
@@ -41,6 +36,9 @@ def parse_listings_args(args: list[str]) -> dict[str, Any]:
     return kwargs
 
 
+# ===================================== ADD ======================================
+
+
 def parse_add_args(args: list[str]) -> dict[str, Any]:
     kwargs: dict[str, Any] = {"item_name": args[0]}
     pairs = zip(args[1::2], args[2::2])
@@ -51,6 +49,9 @@ def parse_add_args(args: list[str]) -> dict[str, Any]:
     return kwargs
 
 
+# ==================================== SELLER ====================================
+
+
 def parse_seller_args(args: list[str]) -> dict[str, Any]:
     kwargs = {}
     pairs = zip(args[1::2], args[2::2])
@@ -59,6 +60,9 @@ def parse_seller_args(args: list[str]) -> dict[str, Any]:
         kwargs[key] = value
 
     return kwargs
+
+
+# ===================================== EDIT =====================================
 
 
 def parse_edit_args(args: list[str], listing: dict[str, Any]) -> dict[str, Any]:

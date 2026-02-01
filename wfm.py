@@ -47,6 +47,7 @@ from parsers import (
 )
 from validators import (
     validate_add_args,
+    validate_search_args,
     validate_seller_args,
     validate_seller_listing_selection,
 )
@@ -179,6 +180,10 @@ async def wfm() -> None:
                         listing_index = int(args[0]) - 1
                         if 0 <= listing_index < len(current_listings):
                             _, kwargs = parse_search_args(args)
+                            success, error = validate_search_args(kwargs)
+                            if not success:
+                                print(f"\n{error}\n")
+                                continue
                             item_id = current_listings[listing_index]["itemId"]
                             item_slug = id_to_slug[item_id]
                         else:
@@ -189,13 +194,17 @@ async def wfm() -> None:
                         continue
                 else:
                     item, kwargs = parse_search_args(args)
+                    success, error = validate_search_args(kwargs)
+                    if not success:
+                        print(f"\n{error}\n")
+                        continue
                     if item.lower() not in name_to_id:
                         print(f"\nItem '{item}' not found.\n")
                         continue
                     item_id = name_to_id[item]
                     item_slug = id_to_slug[item_id]
 
-                current_listings = await search(
+                success, error, current_listings = await search(
                     item_slug, id_to_name, id_to_max_rank, session, **kwargs
                 )
 
