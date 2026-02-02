@@ -110,7 +110,6 @@ def validate_add_args(
     del kwargs["item_name"]
 
     item_id = kwargs["item_id"]
-
     item_name = id_to_name[item_id]
     max_rank = id_to_max_rank[item_id]
     item_tags = id_to_tags[item_id]
@@ -119,23 +118,41 @@ def validate_add_args(
     if "arcane_enhancement" in item_tags and is_bulk_tradeable:
         kwargs["per_trade"] = 1
 
-    missing = []
-    if "price" not in kwargs:
-        missing.append("price")
-    if "quantity" not in kwargs:
-        missing.append("quantity")
-    if max_rank is not None and "rank" not in kwargs:
-        missing.append("rank")
+    missing_fields = []
+    for field in ["price", "quantity"]:
+        if field not in kwargs:
+            missing_fields.append(field)
+    if "rank" not in kwargs and max_rank is not None:
+        missing_fields.append("rank")
 
-    if missing:
+    if missing_fields:
         return (
             False,
-            f"No {missing[0]} specified"
-            if len(missing) == 1
-            else f"No {', '.join(missing[:-1])} or {missing[-1]} specified.",
+            f"No {missing_fields[0]} specified."
+            if len(missing_fields) == 1
+            else f"No {', '.join(missing_fields[:-1])} or {missing_fields[-1]} specified.",
         )
 
+    non_numeric = []
+    for field in ["price", "quantity"]:
+        if not kwargs[field].isdigit():
+            non_numeric.append(field)
+    if "rank" in kwargs and not kwargs["rank"].isdigit():
+        non_numeric.append("rank")
+
+    if non_numeric:
+        return (
+            False,
+            f"{non_numeric[0].capitalize()} must be a number."
+            if len(non_numeric) == 1
+            else f"{non_numeric[0].capitalize()}, {', '.join(non_numeric[1:-1])} and {non_numeric[-1]} must be numbers.",
+        )
+
+    kwargs["price"] = int(kwargs["price"])
+    kwargs["quantity"] = int(kwargs["quantity"])
+
     if "rank" in kwargs:
+        kwargs["rank"] = int(kwargs["rank"])
         rank = kwargs["rank"]
         if max_rank is None:
             return (False, f"No ranks for {item_name}.")

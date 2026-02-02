@@ -36,7 +36,7 @@ def parse_add_args(args: list[str]) -> dict[str, Any]:
     pairs = zip(args[1::2], args[2::2])
 
     for key, value in pairs:
-        kwargs[key] = int(value)
+        kwargs[key] = value
 
     return kwargs
 
