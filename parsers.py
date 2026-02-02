@@ -57,19 +57,11 @@ def parse_seller_args(args: list[str]) -> dict[str, Any]:
 # ===================================== EDIT =====================================
 
 
-def parse_edit_args(args: list[str], listing: dict[str, Any]) -> dict[str, Any]:
-    kwargs = {
-        "price": listing["price"],
-        "quantity": listing["quantity"],
-        "rank": listing["rank"],
-        "visible": listing["visible"],
-    }
-
+def parse_edit_args(args: list[str]) -> dict[str, Any]:
+    kwargs = {}
     pairs = zip(args[1::2], args[2::2])
 
     for key, value in pairs:
-        if key != "visible":
-            value = int(value)
         kwargs[key] = value
 
     return kwargs

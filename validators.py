@@ -99,7 +99,7 @@ def validate_add_args(
     id_to_name: dict[str, str],
     id_to_max_rank: dict[str, int | None],
     id_to_tags: dict[str, set[str]],
-    id_to_bulkTradable: dict[str, bool],
+    id_to_bulk_tradable: dict[str, bool],
 ) -> tuple[bool, str | None]:
     if "item_name" not in kwargs:
         return (False, "No item specified.")
@@ -112,9 +112,9 @@ def validate_add_args(
     item_id = kwargs["item_id"]
 
     item_name = id_to_name[item_id]
-    max_rank: int | None = id_to_max_rank[item_id]
+    max_rank = id_to_max_rank[item_id]
     item_tags = id_to_tags[item_id]
-    is_bulk_tradeable = id_to_bulkTradable[item_id]
+    is_bulk_tradeable = id_to_bulk_tradable[item_id]
 
     if "arcane_enhancement" in item_tags and is_bulk_tradeable:
         kwargs["per_trade"] = 1
@@ -138,8 +138,44 @@ def validate_add_args(
     if "rank" in kwargs:
         rank = kwargs["rank"]
         if max_rank is None:
-            return (False, f"No ranks for{item_name}.")
+            return (False, f"No ranks for {item_name}.")
         if rank < 0 or rank > max_rank:
-            return (False, f"Invalid rank (0-{max_rank}).")
+            return (False, f"Invalid rank for {item_name} (0-{max_rank}).")
+
+    return (True, None)
+
+
+# ===================================== EDIT =====================================
+
+
+def validate_edit_args(
+    kwargs: dict[str, Any],
+    item_id: str,
+    id_to_name: dict[str, str],
+    id_to_max_rank: dict[str, int | None],
+    id_to_tags: dict[str, set[str]],
+    id_to_bulk_tradable: dict[str, bool],
+) -> tuple[bool, str | None]:
+    item_name = id_to_name[item_id]
+    max_rank = id_to_max_rank[item_id]
+    item_tags = id_to_tags[item_id]
+    is_bulk_tradeable = id_to_bulk_tradable[item_id]
+
+    if "arcane_enhancement" in item_tags and is_bulk_tradeable:
+        kwargs["per_trade"] = 1
+
+    for field in ["price", "quantity", "rank"]:
+        if field in kwargs and kwargs[field] is not None:
+            try:
+                kwargs[field] = int(kwargs[field])
+            except ValueError:
+                return (False, f"{field.capitalize()} must be a number.")
+
+    if "rank" in kwargs:
+        rank = kwargs["rank"]
+        if max_rank is None:
+            return (False, f"No ranks for {item_name}.")
+        if rank < 0 or rank > max_rank:
+            return (False, f"Invalid rank for {item_name} (0-{max_rank}).")
 
     return (True, None)

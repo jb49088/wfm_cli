@@ -201,9 +201,6 @@ async def edit_listing(
     session: aiohttp.ClientSession,
     headers: dict[str, str],
     listing_id: str,
-    item_id: str,
-    id_to_tags: dict[str, set[str]],
-    id_to_bulkTradable: dict[str, bool],
     price: int,
     quantity: int,
     rank: int,
@@ -215,9 +212,6 @@ async def edit_listing(
         "rank": rank,
         "visible": visible,
     }
-
-    if "arcane_enhancement" in id_to_tags[item_id] and id_to_bulkTradable[item_id]:
-        payload["perTrade"] = 1
 
     async with session.patch(
         url=f"https://api.warframe.market/v2/order/{listing_id}",

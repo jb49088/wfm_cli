@@ -48,6 +48,7 @@ from parsers import (
 )
 from validators import (
     validate_add_args,
+    validate_edit_args,
     validate_listings_args,
     validate_search_args,
     validate_seller_args,
@@ -150,7 +151,7 @@ async def wfm() -> None:
 
         id_to_name = build_id_to_name_mapping(all_items)
         id_to_tags = build_id_to_tags_mapping(all_items)
-        id_to_bulkTradable = build_id_to_bulkTradable_mapping(all_items)
+        id_to_bulk_tradable = build_id_to_bulkTradable_mapping(all_items)
         id_to_max_rank = build_id_to_max_rank_mapping(all_items)
         id_to_slug = build_id_to_slug_mapping(all_items)
 
@@ -180,17 +181,16 @@ async def wfm() -> None:
                 if args[0].isdigit():
                     if current_listings:
                         listing_index = int(args[0]) - 1
-                        if 0 <= listing_index < len(current_listings):
-                            _, kwargs = parse_search_args(args)
-                            success, error = validate_search_args(kwargs)
-                            if not success:
-                                print(f"\n{error}\n")
-                                continue
-                            item_id = current_listings[listing_index]["itemId"]
-                            item_slug = id_to_slug[item_id]
-                        else:
+                        if not 0 <= listing_index < len(current_listings):
                             print("\nInvalid listing number.\n")
                             continue
+                        _, kwargs = parse_search_args(args)
+                        success, error = validate_search_args(kwargs)
+                        if not success:
+                            print(f"\n{error}\n")
+                            continue
+                        item_id = current_listings[listing_index]["itemId"]
+                        item_slug = id_to_slug[item_id]
                     else:
                         print("\nNo listings available.\n")
                         continue
@@ -272,7 +272,7 @@ async def wfm() -> None:
                     id_to_name,
                     id_to_max_rank,
                     id_to_tags,
-                    id_to_bulkTradable,
+                    id_to_bulk_tradable,
                 )
 
                 if not success:
@@ -299,21 +299,19 @@ async def wfm() -> None:
                     print("\nAll listings visible.\n")
                     continue
                 listing_index = int(args[0]) - 1
-                if 0 <= listing_index < len(current_listings):
-                    listing = current_listings[listing_index]
-                    if "id" not in listing:
-                        print("\nCannot modify other users' listings.\n")
-                        continue
-                    listing_id = listing["id"]
-                    item = listing["item"]
-                    await change_visibility(
-                        session, listing_id, True, authenticated_headers
-                    )
-                    print(f"\n{item} listing visible.\n")
-
-                else:
+                if not 0 <= listing_index < len(current_listings):
                     print("\nInvalid listing number.\n")
                     continue
+                listing = current_listings[listing_index]
+                if "id" not in listing:
+                    print("\nCannot modify other users' listings.\n")
+                    continue
+                listing_id = listing["id"]
+                item = listing["item"]
+                await change_visibility(
+                    session, listing_id, True, authenticated_headers
+                )
+                print(f"\n{item} listing visible.\n")
 
             elif action == "hide":
                 if not args:
@@ -327,21 +325,19 @@ async def wfm() -> None:
                     print("\nAll listings hidden.\n")
                 elif args[0].isdigit():
                     listing_index = int(args[0]) - 1
-                    if 0 <= listing_index < len(current_listings):
-                        listing = current_listings[listing_index]
-                        if "id" not in listing:
-                            print("\nCannot modify other users' listings.\n")
-                            continue
-                        listing_id = listing["id"]
-                        item = listing["item"]
-                        await change_visibility(
-                            session, listing_id, False, authenticated_headers
-                        )
-                        print(f"\n{item} listing hidden.\n")
-
-                    else:
+                    if not 0 <= listing_index < len(current_listings):
                         print("\nInvalid listing number.\n")
                         continue
+                    listing = current_listings[listing_index]
+                    if "id" not in listing:
+                        print("\nCannot modify other users' listings.\n")
+                        continue
+                    listing_id = listing["id"]
+                    item = listing["item"]
+                    await change_visibility(
+                        session, listing_id, False, authenticated_headers
+                    )
+                    print(f"\n{item} listing hidden.\n")
 
                 else:
                     print("\nInvalid listing specifier.\n")
@@ -358,30 +354,55 @@ async def wfm() -> None:
                     print("\nInvalid listing specifier.\n")
                     continue
                 listing_index = int(args[0]) - 1
-                if 0 <= listing_index < len(current_listings):
-                    listing = current_listings[listing_index]
-                    if "id" not in listing:
-                        print("\nCannot modify other users' listings.\n")
-                        continue
-                    listing_id = listing["id"]
-                    item = listing["item"]
-                    await delete_listing(session, listing_id, authenticated_headers)
-                    print(f"\nDeleted {item} listing.\n")
+                if not 0 <= listing_index < len(current_listings):
+                    print("\nInvalid listing number.\n")
+                    continue
+                listing = current_listings[listing_index]
+                if "id" not in listing:
+                    print("\nCannot modify other users' listings.\n")
+                    continue
+                listing_id = listing["id"]
+                item = listing["item"]
+                await delete_listing(session, listing_id, authenticated_headers)
+                print(f"\nDeleted {item} listing.\n")
 
-                else:
+            elif action == "edit":
+                if not args:
+                    print("\nNo listing specified.\n")
+                    continue
+                if not current_listings:
+                    print("\nNo listings available.\n")
+                    continue
+                if not args[0].isdigit():
+                    print("\nInvalid listing specifier.\n")
+                    continue
+                listing_index = int(args[0]) - 1
+                if not 0 <= listing_index < len(current_listings):
                     print("\nInvalid listing number.\n")
                     continue
 
-            elif action == "edit":
-                listing = current_listings[int(args[0]) - 1]
-                kwargs = parse_edit_args(args, listing)
+                kwargs = parse_edit_args(args)
+
+                listing = current_listings[listing_index]
+                for field in ["price", "quantity", "rank", "visible"]:
+                    kwargs.setdefault(field, listing[field])
+
+                success, error = validate_edit_args(
+                    kwargs,
+                    listing["itemId"],
+                    id_to_name,
+                    id_to_max_rank,
+                    id_to_tags,
+                    id_to_bulk_tradable,
+                )
+                if not success:
+                    print(f"\n{error}\n")
+                    continue
+
                 await edit_listing(
                     session,
                     authenticated_headers,
                     listing["id"],
-                    listing["itemId"],
-                    id_to_tags,
-                    id_to_bulkTradable,
                     **kwargs,
                 )
                 print(f"\nUpdated {listing['item']} listing.\n")
@@ -400,9 +421,9 @@ async def wfm() -> None:
                             session,
                             authenticated_headers,
                             listing["id"],
-                            listing["itemId"],
-                            id_to_tags,
-                            id_to_bulkTradable,
+                            # listing["itemId"],
+                            # id_to_tags,
+                            # id_to_bulkTradable,
                             listing["price"],
                             listing["quantity"],
                             listing["rank"],
@@ -416,9 +437,9 @@ async def wfm() -> None:
                         session,
                         authenticated_headers,
                         listing["id"],
-                        listing["itemId"],
-                        id_to_tags,
-                        id_to_bulkTradable,
+                        # listing["itemId"],
+                        # id_to_tags,
+                        # id_to_bulkTradable,
                         listing["price"],
                         listing["quantity"],
                         listing["rank"],
@@ -480,7 +501,7 @@ async def wfm() -> None:
                 success, error = await sync(
                     id_to_name,
                     id_to_tags,
-                    id_to_bulkTradable,
+                    id_to_bulk_tradable,
                     user_info["slug"],
                     session,
                     authenticated_headers,
