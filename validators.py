@@ -101,6 +101,16 @@ def validate_add_args(
     id_to_tags: dict[str, set[str]],
     id_to_bulk_tradable: dict[str, bool],
 ) -> tuple[bool, str | None]:
+    allowed_fields = {"item_name", "price", "quantity", "rank"}
+    invalid_keys = [key for key in kwargs if key not in allowed_fields]
+    if invalid_keys:
+        return (
+            False,
+            f"'{invalid_keys[0]}' is not a valid field."
+            if len(invalid_keys) == 1
+            else f"{', '.join(f"'{k}'" for k in invalid_keys[:-1])} and '{invalid_keys[-1]}' are not valid fields.",
+        )
+
     if "item_name" not in kwargs:
         return (False, "No item specified.")
     elif kwargs["item_name"] not in name_to_id:
@@ -134,18 +144,19 @@ def validate_add_args(
         )
 
     non_numeric = []
-    for field in ["price", "quantity"]:
-        if not kwargs[field].isdigit():
-            non_numeric.append(field)
-    if "rank" in kwargs and not kwargs["rank"].isdigit():
-        non_numeric.append("rank")
+    for field in ["price", "quantity", "rank"]:
+        if field in kwargs and kwargs[field] is not None:
+            try:
+                kwargs[field] = int(kwargs[field])
+            except (ValueError, TypeError):
+                non_numeric.append(field)
 
     if non_numeric:
         return (
             False,
             f"{non_numeric[0].capitalize()} must be a number."
             if len(non_numeric) == 1
-            else f"{non_numeric[0].capitalize()}, {', '.join(non_numeric[1:-1])} and {non_numeric[-1]} must be numbers.",
+            else f"{', '.join(non_numeric[:-1])} and {non_numeric[-1]} must be numbers.".capitalize(),
         )
 
     kwargs["price"] = int(kwargs["price"])
@@ -181,14 +192,27 @@ def validate_edit_args(
     if "arcane_enhancement" in item_tags and is_bulk_tradeable:
         kwargs["per_trade"] = 1
 
+    non_numeric = []
     for field in ["price", "quantity", "rank"]:
         if field in kwargs and kwargs[field] is not None:
             try:
                 kwargs[field] = int(kwargs[field])
-            except ValueError:
-                return (False, f"{field.capitalize()} must be a number.")
+            except (ValueError, TypeError):
+                non_numeric.append(field)
+
+    if non_numeric:
+        return (
+            False,
+            f"{non_numeric[0].capitalize()} must be a number."
+            if len(non_numeric) == 1
+            else f"{', '.join(non_numeric[:-1])} and {non_numeric[-1]} must be numbers.".capitalize(),
+        )
+
+    kwargs["price"] = int(kwargs["price"])
+    kwargs["quantity"] = int(kwargs["quantity"])
 
     if "rank" in kwargs:
+        kwargs["rank"] = int(kwargs["rank"])
         rank = kwargs["rank"]
         if max_rank is None:
             return (False, f"No ranks for {item_name}.")
