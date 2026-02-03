@@ -1,5 +1,48 @@
 from typing import Any
 
+# ==================================== UTILS =====================================
+
+
+def check_invalid_fields(
+    kwargs: dict[str, Any], allowed: set[str]
+) -> tuple[bool, str | None]:
+    """Check for fields not in the allowed set."""
+    invalid = [key for key in kwargs if key not in allowed]
+
+    if not invalid:
+        return (True, None)
+
+    return (
+        False,
+        f"'{invalid[0]}' is not a valid field."
+        if len(invalid) == 1
+        else f"{', '.join(f"'{k}'" for k in invalid[:-1])} and '{invalid[-1]}' are not valid fields.",
+    )
+
+
+def convert_to_int(
+    kwargs: dict[str, Any], fields: list[str]
+) -> tuple[bool, str | None]:
+    """Convert specified fields to integers."""
+    non_numeric = []
+    for field in fields:
+        if field in kwargs and kwargs[field] is not None:
+            try:
+                kwargs[field] = int(kwargs[field])
+            except (ValueError, TypeError):
+                non_numeric.append(field)
+
+    if not non_numeric:
+        return (True, None)
+
+    return (
+        False,
+        f"{non_numeric[0].capitalize()} must be a number."
+        if len(non_numeric) == 1
+        else f"{', '.join(non_numeric[:-1])} and {non_numeric[-1]} must be numbers.".capitalize(),
+    )
+
+
 # ==================================== SEARCH ====================================
 
 
@@ -93,23 +136,6 @@ def validate_seller_args(kwargs: dict[str, Any]) -> tuple[bool, str | None]:
 # ===================================== ADD ======================================
 
 
-def _check_invalid_fields(
-    kwargs: dict[str, Any], allowed: set[str]
-) -> tuple[bool, str | None]:
-    """Check for fields not in the allowed set."""
-    invalid = [key for key in kwargs if key not in allowed]
-
-    if not invalid:
-        return (True, None)
-
-    return (
-        False,
-        f"'{invalid[0]}' is not a valid field."
-        if len(invalid) == 1
-        else f"{', '.join(f"'{k}'" for k in invalid[:-1])} and '{invalid[-1]}' are not valid fields.",
-    )
-
-
 def _check_missing_fields(
     kwargs: dict[str, Any], required: list[str]
 ) -> tuple[bool, str | None]:
@@ -127,29 +153,6 @@ def _check_missing_fields(
     )
 
 
-def _convert_to_int(
-    kwargs: dict[str, Any], fields: list[str]
-) -> tuple[bool, str | None]:
-    """Convert specified fields to integers."""
-    non_numeric = []
-    for field in fields:
-        if field in kwargs and kwargs[field] is not None:
-            try:
-                kwargs[field] = int(kwargs[field])
-            except (ValueError, TypeError):
-                non_numeric.append(field)
-
-    if not non_numeric:
-        return (True, None)
-
-    return (
-        False,
-        f"{non_numeric[0].capitalize()} must be a number."
-        if len(non_numeric) == 1
-        else f"{', '.join(non_numeric[:-1])} and {non_numeric[-1]} must be numbers.".capitalize(),
-    )
-
-
 def validate_add_args(
     kwargs: dict[str, Any],
     name_to_id: dict[str, str],
@@ -159,7 +162,7 @@ def validate_add_args(
     id_to_bulk_tradable: dict[str, bool],
 ) -> tuple[bool, str | None]:
     # Validate input fields
-    success, error = _check_invalid_fields(
+    success, error = check_invalid_fields(
         kwargs, {"item_name", "price", "quantity", "rank"}
     )
     if not success:
@@ -193,7 +196,7 @@ def validate_add_args(
         return (False, error)
 
     # Convert numeric fields
-    success, error = _convert_to_int(kwargs, ["price", "quantity", "rank"])
+    success, error = convert_to_int(kwargs, ["price", "quantity", "rank"])
     if not success:
         return (False, error)
 
@@ -220,6 +223,13 @@ def validate_edit_args(
     id_to_tags: dict[str, set[str]],
     id_to_bulk_tradable: dict[str, bool],
 ) -> tuple[bool, str | None]:
+    # Validate input fields
+    success, error = check_invalid_fields(
+        kwargs, {"item_name", "price", "quantity", "rank"}
+    )
+    if not success:
+        return (False, error)
+
     item_name = id_to_name[item_id]
     max_rank = id_to_max_rank[item_id]
     item_tags = id_to_tags[item_id]
@@ -228,24 +238,10 @@ def validate_edit_args(
     if "arcane_enhancement" in item_tags and is_bulk_tradeable:
         kwargs["per_trade"] = 1
 
-    non_numeric = []
-    for field in ["price", "quantity", "rank"]:
-        if field in kwargs and kwargs[field] is not None:
-            try:
-                kwargs[field] = int(kwargs[field])
-            except (ValueError, TypeError):
-                non_numeric.append(field)
-
-    if non_numeric:
-        return (
-            False,
-            f"{non_numeric[0].capitalize()} must be a number."
-            if len(non_numeric) == 1
-            else f"{', '.join(non_numeric[:-1])} and {non_numeric[-1]} must be numbers.".capitalize(),
-        )
-
-    kwargs["price"] = int(kwargs["price"])
-    kwargs["quantity"] = int(kwargs["quantity"])
+    # Convert numeric fields
+    success, error = convert_to_int(kwargs, ["price", "quantity", "rank"])
+    if not success:
+        return (False, error)
 
     if "rank" in kwargs:
         kwargs["rank"] = int(kwargs["rank"])

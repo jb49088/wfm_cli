@@ -388,9 +388,6 @@ async def wfm() -> None:
                     print("\nCannot modify other users' listings.\n")
                     continue
 
-                for field in ["price", "quantity", "rank", "visible"]:
-                    kwargs.setdefault(field, listing[field])
-
                 success, error = validate_edit_args(
                     kwargs,
                     listing["itemId"],
@@ -402,6 +399,9 @@ async def wfm() -> None:
                 if not success:
                     print(f"\n{error}\n")
                     continue
+
+                for field in ["price", "quantity", "rank", "visible"]:
+                    kwargs.setdefault(field, listing[field])
 
                 await edit_listing(
                     session,
