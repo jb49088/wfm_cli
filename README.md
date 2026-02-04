@@ -4,7 +4,7 @@ This application bypasses standard authentication measures by acting as your bro
 
 ### wfm
 
-Unofficial REPL-style CLI frontend and automated listings manager for warframe.market.
+Unofficial REPL-style CLI frontend and automated listings manager for warframe.market. This tool aims to enhance trading with features the official site lacks like bulk opertaions and automated listing syncing via EE.log parsing.
 
 <!-- CODE_STATISTICS_START -->
 
