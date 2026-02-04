@@ -37,10 +37,8 @@ from display import DEFAULT_ORDERS, clear_screen, display_help, display_profile
 from filters import sort_listings
 from parsers import (
     parse_add_args,
-    parse_edit_args,
-    parse_listings_args,
+    parse_args,
     parse_search_args,
-    parse_seller_args,
 )
 from validators import (
     validate_add_args,
@@ -206,7 +204,7 @@ async def wfm() -> None:
                 )
 
             elif action == "listings":
-                kwargs = parse_listings_args(args)
+                kwargs = parse_args(args)
 
                 success, error = validate_listings_args(kwargs)
                 if not success:
@@ -235,7 +233,7 @@ async def wfm() -> None:
                     continue
                 assert listing is not None
 
-                kwargs = parse_seller_args(args)
+                kwargs = parse_args(args)
 
                 success, error = validate_seller_args(kwargs)
                 if not success:
@@ -376,7 +374,7 @@ async def wfm() -> None:
                     print("\nInvalid listing number.\n")
                     continue
 
-                kwargs = parse_edit_args(args)
+                kwargs = parse_args(args)
 
                 listing = current_listings[listing_index]
 

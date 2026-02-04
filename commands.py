@@ -80,6 +80,7 @@ UNLINKABLE_ITEMS = {
     "Equilibrium (Steam Pinnacle Pack)",
     "Baro Void-Signal (Key)",
 }
+
 UNICODE_RANK_PATTERN = re.compile(r"[\uE000-\uF8FF]")
 
 # ===================================== COPY =====================================
