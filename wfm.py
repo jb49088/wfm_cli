@@ -446,10 +446,10 @@ async def wfm() -> None:
                     if not user_listings:
                         print("\nNo listings available.\n")
                         continue
+                    print("\nBumping all listings...\n")
                     sorted_listings, _ = sort_listings(
                         user_listings, "updated", "asc", DEFAULT_ORDERS
                     )
-                    print("\nBumping all listings...\n")
                     for listing in sorted_listings:
                         fields = ["price", "quantity", "rank", "visible"]
                         kwargs = {
@@ -546,6 +546,7 @@ async def wfm() -> None:
                 display_help()
 
             elif action == "exit" or action == "quit":
+                websocket_task.cancel()
                 break
 
             else:

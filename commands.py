@@ -451,6 +451,8 @@ async def _update_listings(
 
         sync_occurred = True
 
+        print("\nSyncing listings...\n")
+
         plat_received = sum(
             int(item.split()[-1]) for item in trade["received"] if "Platinum" in item
         )
@@ -468,18 +470,13 @@ async def _update_listings(
             listings.remove(candidate)
             print(f"Deleted {candidate['item']} listing.")
         else:
-            await edit_listing(
-                session,
-                headers,
-                candidate["id"],
-                candidate["itemId"],
-                id_to_tags,
-                id_to_bulkTradable,
-                candidate["price"],
-                candidate["quantity"],
-                candidate["rank"],
-                candidate["visible"],
-            )
+            fields = ["price", "quantity", "rank", "visible"]
+            kwargs = {
+                field: candidate[field]
+                for field in fields
+                if candidate[field] is not None
+            }
+            await edit_listing(session, headers, candidate["id"], **kwargs)
             print(
                 f"Updated {candidate['item']} listing quantity to {candidate['quantity']}."
             )
