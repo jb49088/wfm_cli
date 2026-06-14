@@ -167,6 +167,10 @@ async def wfm() -> None:
                 break
 
             parts = shlex.split(cmd)
+
+            if not parts:
+                continue
+
             action = parts[0].lower()
             args = parts[1:]
 
