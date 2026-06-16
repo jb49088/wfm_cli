@@ -438,20 +438,21 @@ async def _update_listings(
     headers: dict[str, str],
 ) -> None:
     """Decrement quantities or delete listings based on trade patterns in EE.log"""
-    sync_occurred = False
+    valid_trades = []
     for trade in trades:
-        candidates = []
-        for listing in listings:
-            if listing["item"] in trade["offered"]:
-                candidates.append(listing)
+        candidates = [
+            listing for listing in listings if listing["item"] in trade["offered"]
+        ]
+        if candidates:
+            valid_trades.append((trade, candidates))
 
-        if not candidates:
-            continue
+    if not valid_trades:
+        print("\nNo listings synced.\n")
+        return
 
-        sync_occurred = True
+    print("\nSyncing listings...\n")
 
-        print("\nSyncing listings...\n")
-
+    for trade, candidates in valid_trades:
         plat_received = sum(
             int(item.split()[-1]) for item in trade["received"] if "Platinum" in item
         )
@@ -483,9 +484,6 @@ async def _update_listings(
         await asyncio.sleep(0.5)  # Rate limit
 
     print()
-
-    if not sync_occurred:
-        print("\nNo listings synced.\n")
 
 
 async def sync(
