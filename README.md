@@ -1,7 +1,3 @@
-### WARNING
-
-This application bypasses standard authentication measures by acting as your browser. I am not responsible for any penalties or consequences to your warframe.market account. Use this tool at your own risk.
-
 ### wfm
 
 Unofficial REPL-style CLI frontend and automated listings manager for warframe.market. This tool aims to enhance trading with features the official site lacks like bulk opertaions and automated listing syncing via EE.log parsing.
@@ -15,10 +11,10 @@ Unofficial REPL-style CLI frontend and automated listings manager for warframe.m
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
 Python                          10            405             72           1591
-Markdown                         1             14              4             38
+Markdown                         1             12              4             36
 Text                             1              0              0             16
 -------------------------------------------------------------------------------
-SUM:                            12            419             76           1645
+SUM:                            12            417             76           1643
 -------------------------------------------------------------------------------
 ```
 <!-- CODE_STATISTICS_END -->
