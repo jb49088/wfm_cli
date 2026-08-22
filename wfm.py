@@ -290,12 +290,12 @@ async def wfm() -> None:
                 if not current_listings:
                     print("\nNo listings available.\n")
                     continue
-                if not args[0].isdigit():
-                    print("\nInvalid listing specifier.\n")
-                    continue
                 if args[0] == "all":
                     await change_all_visibility(session, True, authenticated_headers)
                     print("\nAll listings visible.\n")
+                    continue
+                if not args[0].isdigit():
+                    print("\nInvalid listing specifier.\n")
                     continue
                 listing_index = int(args[0]) - 1
                 if not 0 <= listing_index < len(current_listings):
